@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNotifications } from './NotificationContext';
+import { useToast } from './ToastContext';
 
 const HospitalityContext = createContext();
 
@@ -169,6 +170,7 @@ export const HospitalityProvider = ({ children }) => {
   }, [activityLog]);
 
   const { addNotification } = useNotifications();
+  const { showToast } = useToast();
 
   const addActivity = (message, type = 'info') => {
     setActivityLog(prev => [{ id: Date.now(), message, time: 'Just now', type }, ...prev].slice(0, 20));
@@ -254,6 +256,7 @@ export const HospitalityProvider = ({ children }) => {
       message: `${res.guestName}'s booking for ${res.targetId} is now confirmed.`,
       targetRole: 'ADMIN'
     });
+    showToast(`📧 Booking confirmation email sent to ${res.email || 'guest'}!`, 'success');
   };
 
   const rejectReservation = (id) => {
@@ -312,12 +315,23 @@ export const HospitalityProvider = ({ children }) => {
   };
 
   const addReservation = (res) => {
-    setReservations(prev => [...prev, { ...res, id: `RES-${Date.now().toString().slice(-4)}` }]);
+    const newRes = { ...res, id: `RES-${Date.now().toString().slice(-4)}` };
+    setReservations(prev => [...prev, newRes]);
     addActivity(`New reservation request from ${res.guestName}`, 'info');
+    showToast(`📧 Booking request received! Email sent to ${res.email || 'guest'}.`, 'success');
   };
 
   const updateReservation = (id, data) => {
-    setReservations(prev => prev.map(r => r.id === id ? { ...r, ...data } : r));
+    setReservations(prev => prev.map(r => {
+      if (r.id === id) {
+        const updated = { ...r, ...data };
+        if (data.status === 'Confirmed' && r.status !== 'Confirmed') {
+          showToast(`📧 Booking confirmation email sent to ${r.email || 'guest'}!`, 'success');
+        }
+        return updated;
+      }
+      return r;
+    }));
   };
 
   const deleteReservation = (id) => {

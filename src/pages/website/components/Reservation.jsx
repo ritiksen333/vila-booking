@@ -35,6 +35,33 @@ const Reservation = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentState, setPaymentState] = useState('idle'); // 'idle' | 'processing' | 'success'
 
+  // Promo Codes State
+  const [promoCode, setPromoCode] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState(null); // { code: '...', percent: 10 }
+  const [promoError, setPromoError] = useState('');
+
+  const promoCodes = {
+    'LUMIERE10': 10,
+    'WELCOME20': 20,
+    'BALILIFE': 15
+  };
+
+  const handleApplyPromo = (e) => {
+    if (e) e.preventDefault();
+    setPromoError('');
+    const code = promoCode.trim().toUpperCase();
+    if (promoCodes[code]) {
+      setAppliedPromo({ code, percent: promoCodes[code] });
+      setPromoCode('');
+    } else {
+      setPromoError('Invalid promo code.');
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+  };
+
   // Default room selection
   useEffect(() => {
     if (rooms && rooms.length > 0 && !selectedRoomId) {
@@ -62,6 +89,9 @@ const Reservation = () => {
 
   const selectedRoom = rooms?.find(r => r.id === selectedRoomId) || rooms?.[0];
   const totalPrice = selectedRoom ? selectedRoom.price * nights : 0;
+  
+  const discountAmount = appliedPromo ? Math.round((totalPrice * appliedPromo.percent) / 100) : 0;
+  const finalPrice = totalPrice - discountAmount;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -100,17 +130,20 @@ const Reservation = () => {
       notes: formData.specialRequests,
       email: formData.email,
       phone: formData.phone,
-      totalEstimate: totalPrice,
-      total: totalPrice
+      totalEstimate: finalPrice,
+      total: finalPrice,
+      promoApplied: appliedPromo ? appliedPromo.code : null,
+      discountAmount: discountAmount
     };
 
     addReservation(reservation);
     
-    // Reset form
+    // Reset form & promo
     setFormData({
       firstName: '', lastName: '', email: formData.email, phone: '',
       checkIn: '', checkOut: '', guests: 2, specialRequests: ''
     });
+    setAppliedPromo(null);
     
     // Switch to track tab and show this booking
     setTrackEmail(formData.email);
@@ -189,7 +222,7 @@ const Reservation = () => {
 
 
   return (
-    <section id="reservation" className="py-24 bg-surface relative overflow-hidden">
+    <section id="booking" className="py-24 bg-surface relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         <div className="text-center mb-16">
@@ -327,7 +360,7 @@ const Reservation = () => {
                   {selectedRoom && (
                     <div className="space-y-6">
                       <div className="aspect-video rounded-2xl overflow-hidden shadow-md">
-                        <img src="/luxury-villa-hero.png" alt="Villa" className="w-full h-full object-cover" />
+                        <img src="/luxury-villa-hero.png" alt="Villa" loading="lazy" className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <h4 className="text-base font-black text-text-primary uppercase">{selectedRoom.name}</h4>

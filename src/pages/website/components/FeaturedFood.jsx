@@ -34,6 +34,7 @@ const FeaturedFood = () => {
                 <img 
                   src={villa.img} 
                   alt={villa.name} 
+                  loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                 />
                 <div className="absolute top-4 right-4 bg-surface text-text-primary text-xs font-bold px-3 py-1 uppercase tracking-widest shadow-md">

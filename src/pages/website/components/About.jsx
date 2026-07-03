@@ -32,7 +32,8 @@ const About = () => {
               <img 
                 src={img} 
                 alt={`Gallery image ${i + 1}`} 
-                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110" 
+                loading="lazy"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
               />
               <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </motion.div>
