@@ -9,20 +9,41 @@ import {
   Phone,
   Mail,
   MapPin,
-  Bed
+  Bed,
+  Plus
 } from 'lucide-react';
 import { cn } from "../../../utils/cn";
 import { useHospitality } from "../../../context/HospitalityContext";
 
 const Guests = () => {
-  const { reservations, folios } = useHospitality();
+  const { reservations, folios, customers, addCustomer } = useHospitality();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGuest, setSelectedGuest] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newGuestName, setNewGuestName] = useState('');
+  const [newGuestEmail, setNewGuestEmail] = useState('');
+  const [newGuestPhone, setNewGuestPhone] = useState('');
   const [activeTab, setActiveTab] = useState('bookings');
 
   // Derive unique guests and their data
   const guestsList = useMemo(() => {
     const guestMap = new Map();
+
+    // Process explicit customers
+    if (customers) {
+      customers.forEach(cust => {
+        if (!guestMap.has(cust.name)) {
+          guestMap.set(cust.name, {
+            name: cust.name,
+            email: cust.email,
+            phone: cust.phone,
+            reservations: [],
+            folios: [],
+            totalSpent: 0
+          });
+        }
+      });
+    }
 
     // Process Reservations
     reservations.forEach(res => {
@@ -58,7 +79,17 @@ const Guests = () => {
     return Array.from(guestMap.values()).filter(g => 
       g.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [reservations, folios, searchQuery]);
+  }, [reservations, folios, customers, searchQuery]);
+
+  const handleAddGuest = (e) => {
+    e.preventDefault();
+    if (!newGuestName.trim()) return;
+    addCustomer({ name: newGuestName, email: newGuestEmail, phone: newGuestPhone });
+    setNewGuestName('');
+    setNewGuestEmail('');
+    setNewGuestPhone('');
+    setShowAddModal(false);
+  };
 
   return (
     <div className="h-full flex flex-col gap-6">
@@ -75,6 +106,14 @@ const Guests = () => {
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
+          <button 
+            onClick={() => setShowAddModal(true)}
+            className="h-[50px] px-6 btn-primary rounded-2xl flex items-center gap-2 shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="text-xs font-black uppercase tracking-widest">New Guest</span>
+          </button>
+
           <div className="relative group min-w-[240px]">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
             <input 
@@ -95,6 +134,7 @@ const Guests = () => {
             <thead>
               <tr className="text-left bg-slate-50/50 border-b border-slate-100">
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Guest Name</th>
+                <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Contact Info</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Total Bookings</th>
                 <th className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Total Spent</th>
                 <th className="px-8 py-5"></th>
@@ -111,6 +151,10 @@ const Guests = () => {
                       <p className="text-sm font-black text-text-primary uppercase tracking-tight">{guest.name}</p>
                     </div>
                   </td>
+                  <td className="px-8 py-5">
+                    <p className="text-xs font-bold text-text-secondary flex items-center gap-1.5"><Mail className="w-3 h-3"/> {guest.email || '-'}</p>
+                    <p className="text-[10px] font-bold text-slate-400 mt-1 flex items-center gap-1.5"><Phone className="w-3 h-3"/> {guest.phone || '-'}</p>
+                  </td>
                   <td className="px-8 py-5 text-sm font-bold text-text-secondary">
                     {guest.reservations.length} Bookings
                   </td>
@@ -126,7 +170,7 @@ const Guests = () => {
               ))}
               {guestsList.length === 0 && (
                 <tr>
-                  <td colSpan="4" className="text-center py-10 text-slate-400 font-bold">No guests found.</td>
+                  <td colSpan="5" className="text-center py-10 text-slate-400 font-bold">No guests found.</td>
                 </tr>
               )}
             </tbody>
@@ -173,8 +217,8 @@ const Guests = () => {
                 <div>
                   <h3 className="text-xl lg:text-2xl font-black text-text-primary uppercase tracking-tight">{selectedGuest.name}</h3>
                   <div className="flex gap-3 mt-1.5">
-                    <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest"><Mail className="w-3 h-3"/> Unknown Email</span>
-                    <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest"><Phone className="w-3 h-3"/> Unknown Phone</span>
+                    <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest"><Mail className="w-3 h-3"/> {selectedGuest.email || 'Unknown Email'}</span>
+                    <span className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-widest"><Phone className="w-3 h-3"/> {selectedGuest.phone || 'Unknown Phone'}</span>
                   </div>
                 </div>
               </div>
@@ -264,6 +308,61 @@ const Guests = () => {
           </div>
         </div>
       )}
+
+      {/* Add Guest Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+          <div onClick={() => setShowAddModal(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+          <div className="relative w-full max-w-md bg-white rounded-[2rem] lg:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300">
+            <div className="p-6 lg:p-8 border-b border-slate-50 bg-slate-50/30 flex justify-between items-start shrink-0">
+              <div>
+                <h3 className="text-xl lg:text-2xl font-black text-text-primary uppercase tracking-tight">Add New Guest</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Create a new customer profile</p>
+              </div>
+              <button onClick={() => setShowAddModal(false)} className="p-2 lg:p-3 hover:bg-white rounded-2xl transition-all text-slate-400"><X className="w-6 h-6" /></button>
+            </div>
+            
+            <form onSubmit={handleAddGuest} className="p-6 lg:p-8 space-y-5">
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Guest Name</label>
+                <input 
+                  required 
+                  type="text" 
+                  value={newGuestName}
+                  onChange={(e) => setNewGuestName(e.target.value)}
+                  placeholder="e.g. John Doe" 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-primary text-sm font-bold" 
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Email Address</label>
+                <input 
+                  type="email" 
+                  value={newGuestEmail}
+                  onChange={(e) => setNewGuestEmail(e.target.value)}
+                  placeholder="e.g. john@example.com" 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-primary text-sm font-bold" 
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Phone Number</label>
+                <input 
+                  type="text" 
+                  value={newGuestPhone}
+                  onChange={(e) => setNewGuestPhone(e.target.value)}
+                  placeholder="e.g. +1 234 567 8900" 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-primary text-sm font-bold" 
+                />
+              </div>
+              <div className="pt-4 flex gap-4">
+                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 h-12 bg-slate-100 rounded-xl text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-200">Cancel</button>
+                <button type="submit" className="flex-1 h-12 btn-primary rounded-xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-all">Add Guest</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

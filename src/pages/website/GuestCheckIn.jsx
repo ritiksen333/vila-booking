@@ -14,7 +14,7 @@ const GuestCheckIn = () => {
           animate={{ opacity: 1, scale: 1 }}
           className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-[1.5rem] shadow-xl flex items-center justify-center mb-6"
         >
-          <img src="/1000464407-removebg-preview.png" alt="Logo" className="w-12 md:w-16 h-auto" />
+          <img src="/villa-logo.png" alt="Logo" className="w-12 md:w-16 h-auto" />
         </motion.div>
 
         {/* Title & Subtitle */}

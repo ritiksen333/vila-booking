@@ -48,17 +48,6 @@ import Orders from './pages/dashboard/waiter/Orders';
 // Dashboard - Kitchen
 import Kitchen from './pages/dashboard/kitchen/Kitchen';
 
-// Dashboard - Customer
-import CustomerHome from './pages/dashboard/customer/CustomerHome';
-import CustomerOrderNow from './pages/dashboard/customer/CustomerOrderNow';
-import CustomerOrders from './pages/dashboard/customer/CustomerOrders';
-import CustomerFavorites from './pages/dashboard/customer/CustomerFavorites';
-import CustomerProfile from './pages/dashboard/customer/CustomerProfile';
-import CustomerSupport from './pages/dashboard/customer/CustomerSupport';
-import CustomerReservations from './pages/dashboard/customer/CustomerReservations';
-import CustomerMessages from './pages/dashboard/customer/CustomerMessages';
-import CustomerServices from './pages/dashboard/customer/CustomerServices';
-import CustomerCart from './pages/dashboard/customer/CustomerCart';
 
 // Dashboard - Reception
 import Rooms from './pages/dashboard/reception/Rooms';
@@ -328,68 +317,6 @@ function App() {
                         </ProtectedRoute>
                       } />
 
-                      {/* Customer Routes */}
-                      <Route path="/customer" element={<Navigate to="/customer/home" replace />} />
-                      
-                      <Route path="/customer/home" element={
-                        <ProtectedRoute allowedRoles={[roles.CUSTOMER]}>
-                          <MainLayout><CustomerHome /></MainLayout>
-                        </ProtectedRoute>
-                      } />
-                      
-                      <Route path="/customer/order-now" element={
-                        <ProtectedRoute allowedRoles={[roles.CUSTOMER]}>
-                          <MainLayout><CustomerOrderNow /></MainLayout>
-                        </ProtectedRoute>
-                      } />
-
-                      <Route path="/customer/orders" element={
-                        <ProtectedRoute allowedRoles={[roles.CUSTOMER]}>
-                          <MainLayout><CustomerOrders /></MainLayout>
-                        </ProtectedRoute>
-                      } />
-
-                      <Route path="/customer/reservations" element={
-                        <ProtectedRoute allowedRoles={[roles.CUSTOMER]}>
-                          <MainLayout><CustomerReservations /></MainLayout>
-                        </ProtectedRoute>
-                      } />
-
-                      <Route path="/customer/services" element={
-                        <ProtectedRoute allowedRoles={[roles.CUSTOMER]}>
-                          <MainLayout><CustomerServices /></MainLayout>
-                        </ProtectedRoute>
-                      } />
-
-                      <Route path="/customer/favorites" element={
-                        <ProtectedRoute allowedRoles={[roles.CUSTOMER]}>
-                          <MainLayout><CustomerFavorites /></MainLayout>
-                        </ProtectedRoute>
-                      } />
-
-                      <Route path="/customer/profile" element={
-                        <ProtectedRoute allowedRoles={[roles.CUSTOMER]}>
-                          <MainLayout><CustomerProfile /></MainLayout>
-                        </ProtectedRoute>
-                      } />
-
-                      <Route path="/customer/support" element={
-                        <ProtectedRoute allowedRoles={[roles.CUSTOMER]}>
-                          <MainLayout><CustomerSupport /></MainLayout>
-                        </ProtectedRoute>
-                      } />
-
-                      <Route path="/customer/messages" element={
-                        <ProtectedRoute allowedRoles={[roles.CUSTOMER]}>
-                          <MainLayout><CustomerMessages /></MainLayout>
-                        </ProtectedRoute>
-                      } />
-
-                      <Route path="/customer/cart" element={
-                        <ProtectedRoute allowedRoles={[roles.CUSTOMER]}>
-                          <MainLayout><CustomerCart /></MainLayout>
-                        </ProtectedRoute>
-                      } />
 
                       <Route path="*" element={<Navigate to="/" />} />
                     </Routes>

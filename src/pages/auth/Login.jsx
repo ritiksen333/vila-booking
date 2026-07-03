@@ -19,7 +19,6 @@ const Login = () => {
     setTimeout(() => {
       let role = roles.ADMIN;
       if (email.includes('manager')) role = roles.MANAGER;
-      else if (email.includes('customer')) role = roles.CUSTOMER;
 
       login(role);
       setLoading(false);
@@ -27,7 +26,6 @@ const Login = () => {
       switch (role) {
         case roles.ADMIN: navigate('/admin/dashboard'); break;
         case roles.MANAGER: navigate('/manager/dashboard'); break;
-        case roles.CUSTOMER: navigate('/customer/home'); break;
         default: navigate('/dashboard');
       }
     }, 1000);
@@ -36,8 +34,7 @@ const Login = () => {
   const handleDemoLogin = (role) => {
     const roleEmails = {
       ADMIN: 'admin@lumierevillas.com',
-      MANAGER: 'manager@lumierevillas.com',
-      CUSTOMER: 'customer@lumierevillas.com'
+      MANAGER: 'manager@lumierevillas.com'
     };
     
     setEmail(roleEmails[role] || `${role.toLowerCase()}@lumierevillas.com`);
@@ -78,7 +75,7 @@ const Login = () => {
             <div>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center p-1.5 shadow-xl shadow-black/20">
-                  <img src="/1000464407-removebg-preview.png" alt="Logo" className="w-full h-full object-contain" />
+                  <img src="/villa-logo.png" alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <span className="text-3xl font-black tracking-tighter text-white drop-shadow-2xl uppercase">
                 LUMIÈRE <span className="text-primary">VILLAS</span>
@@ -98,7 +95,7 @@ const Login = () => {
           <div className="flex justify-center mb-8">
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center p-1 shadow-lg shadow-black/10">
-                <img src="/1000464407-removebg-preview.png" alt="Logo" className="w-full h-full object-contain" />
+                <img src="/villa-logo.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <span className="text-xl font-black tracking-tight text-white uppercase">
                 LUMIÈRE <span className="text-primary">VILLAS</span>

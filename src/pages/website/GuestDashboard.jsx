@@ -30,7 +30,7 @@ const GuestDashboard = () => {
       <header className="bg-white px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm border-b border-gray-50">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-            <img src="/1000464407-removebg-preview.png" alt="Logo" className="w-5 h-auto brightness-0 invert" />
+            <img src="/villa-logo.png" alt="Logo" className="w-5 h-auto brightness-0 invert" />
           </div>
           <span className="text-lg font-black uppercase tracking-tighter text-slate-800">LUMIÈRE VILLAS</span>
         </div>

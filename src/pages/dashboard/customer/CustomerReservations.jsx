@@ -9,19 +9,23 @@ import {
   X,
   MapPin,
   ChevronRight,
-  Info
+  Info,
+  Lock
 } from 'lucide-react';
 import { cn } from "../../../utils/cn";
 import { useHospitality } from "../../../context/HospitalityContext";
 import { useAuth } from "../../../context/AuthContext";
+import { useCommunication } from "../../../context/CommunicationContext";
 
 const CustomerReservations = () => {
   const { reservations, cancelReservation, updateReservation } = useHospitality();
   const { user } = useAuth();
+  const { sendMessage } = useCommunication();
   
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showToast, setShowToast] = useState(null);
+  const [paymentState, setPaymentState] = useState('idle'); // 'idle' | 'processing' | 'success'
 
   const displayToast = (msg, type = 'success') => {
     setShowToast({ msg, type });
@@ -52,11 +56,24 @@ const CustomerReservations = () => {
   const handleProcessPayment = (e) => {
     e.preventDefault();
     if (selectedBooking) {
-      // Simulate Payment Process
-      updateReservation(selectedBooking.id, { status: 'Confirmed', paymentStatus: 'Paid' });
-      displayToast('Payment processed successfully. Booking is now Confirmed!');
-      setShowPaymentModal(false);
-      setSelectedBooking(null);
+      setPaymentState('processing');
+      // Simulate Payment Process Delay
+      setTimeout(() => {
+        setPaymentState('success');
+        updateReservation(selectedBooking.id, { status: 'Confirmed', paymentStatus: 'Paid' });
+        
+        // Simulate automated email via Inbox
+        const emailContent = `Booking Confirmed! ✅\n\nHi ${user?.name.split(' ')[0]},\nWe have successfully received your payment of ₹${selectedBooking.total?.toLocaleString()}.\n\nBooking Details:\n- Villa: ${selectedBooking.targetId}\n- Check-in: ${selectedBooking.date}\n- Check-out: ${selectedBooking.checkOut || '-'}\n- Guests: ${selectedBooking.guests}\n\nWe look forward to hosting you at LUMIÈRE VILLAS!`;
+        sendMessage('CUST-TEMP', user?.name, emailContent, 'System');
+
+        displayToast('Payment processed successfully. Confirmation email sent!');
+        
+        setTimeout(() => {
+          setShowPaymentModal(false);
+          setSelectedBooking(null);
+          setPaymentState('idle');
+        }, 1500);
+      }, 2000);
     }
   };
 
@@ -218,40 +235,124 @@ const CustomerReservations = () => {
         document.body
       )}
 
-      {/* Payment Modal */}
+      {/* Stripe-like Payment Modal */}
       {showPaymentModal && selectedBooking && createPortal(
         <div className="fixed inset-0 z-[700] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowPaymentModal(false)} />
-          <div className="relative w-full max-w-sm bg-white rounded-[3rem] p-8 shadow-2xl animate-in zoom-in duration-300">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-500">
-                <CreditCard className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-black text-text-primary uppercase tracking-tight">Complete Payment</h3>
-              <p className="text-sm font-bold text-slate-400 mt-2">Amount due: ₹{selectedBooking.total?.toLocaleString()}</p>
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => paymentState === 'idle' && setShowPaymentModal(false)} />
+          <div className="relative w-full max-w-[440px] bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-300 flex flex-col">
+            
+            {/* Header / Brand */}
+            <div className="bg-slate-50 px-8 py-6 border-b border-slate-100 flex items-center justify-between">
+               <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center p-1.5">
+                   <img src="/villa-logo.png" alt="Logo" className="w-full h-full object-contain" />
+                 </div>
+                 <div>
+                   <h3 className="text-sm font-black text-text-primary tracking-tight">LUMIÈRE VILLAS</h3>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedBooking.targetId}</p>
+                 </div>
+               </div>
+               <div className="text-right">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Amount Due</p>
+                  <p className="text-lg font-black text-text-primary">₹{selectedBooking.total?.toLocaleString()}</p>
+               </div>
             </div>
 
-            <form onSubmit={handleProcessPayment} className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Card Number</label>
-                <input required type="text" placeholder="**** **** **** ****" className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-primary text-sm font-bold" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Expiry</label>
-                  <input required type="text" placeholder="MM/YY" className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-primary text-sm font-bold" />
+            {/* Payment Content */}
+            <div className="p-8">
+              {paymentState === 'success' ? (
+                <div className="flex flex-col items-center justify-center py-8 animate-in fade-in zoom-in duration-500">
+                  <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-6">
+                    <CheckCircle2 className="w-10 h-10" />
+                  </div>
+                  <h3 className="text-2xl font-black text-text-primary uppercase tracking-tight">Payment Successful</h3>
+                  <p className="text-sm font-bold text-slate-500 mt-2 text-center">Your booking is now fully confirmed.</p>
                 </div>
-                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">CVC</label>
-                  <input required type="password" placeholder="***" className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-primary text-sm font-bold" />
-                </div>
-              </div>
+              ) : (
+                <form onSubmit={handleProcessPayment} className="space-y-6">
+                  <div>
+                    <h4 className="text-sm font-black text-text-primary mb-4 flex items-center justify-between">
+                      Pay with card
+                      <div className="flex gap-1">
+                        {/* Visa/Mastercard Mock Icons */}
+                        <div className="w-8 h-5 bg-indigo-600 rounded flex items-center justify-center text-[8px] text-white font-bold italic">VISA</div>
+                        <div className="w-8 h-5 bg-slate-800 rounded flex items-center justify-center text-[7px] text-white font-bold relative overflow-hidden">
+                           <div className="absolute left-1 w-3 h-3 bg-red-500 rounded-full opacity-80"></div>
+                           <div className="absolute right-1 w-3 h-3 bg-amber-500 rounded-full opacity-80"></div>
+                        </div>
+                      </div>
+                    </h4>
+                    
+                    {/* Stripe-like Input Group */}
+                    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all">
+                      <div className="border-b border-slate-200 px-4 py-3 relative">
+                        <CreditCard className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                        <input 
+                          required 
+                          type="text" 
+                          placeholder="Card number" 
+                          className="w-full pl-8 outline-none text-sm font-medium placeholder-slate-400"
+                          maxLength="19"
+                        />
+                      </div>
+                      <div className="flex">
+                        <div className="flex-1 px-4 py-3 border-r border-slate-200 relative">
+                           <input 
+                            required 
+                            type="text" 
+                            placeholder="MM / YY" 
+                            className="w-full outline-none text-sm font-medium placeholder-slate-400"
+                            maxLength="5"
+                          />
+                        </div>
+                        <div className="flex-1 px-4 py-3 relative">
+                           <input 
+                            required 
+                            type="text" 
+                            placeholder="CVC" 
+                            className="w-full outline-none text-sm font-medium placeholder-slate-400"
+                            maxLength="4"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-black text-text-primary mb-2 block">Name on card</label>
+                    <input 
+                      required 
+                      type="text" 
+                      defaultValue={user?.name || ''}
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl outline-none text-sm font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                    />
+                  </div>
 
-              <div className="pt-4 flex gap-4">
-                <button type="button" onClick={() => setShowPaymentModal(false)} className="flex-1 h-12 bg-slate-100 rounded-xl text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-200">Cancel</button>
-                <button type="submit" className="flex-1 h-12 btn-primary rounded-xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20">Pay ₹{selectedBooking.total?.toLocaleString()}</button>
-              </div>
-            </form>
+                  <button 
+                    type="submit" 
+                    disabled={paymentState === 'processing'}
+                    className={cn(
+                      "w-full h-14 rounded-xl text-sm font-black uppercase tracking-widest shadow-xl flex items-center justify-center transition-all",
+                      paymentState === 'processing' ? "bg-slate-100 text-slate-400 shadow-none" : "bg-[#635BFF] text-white shadow-[#635BFF]/30 hover:bg-[#5249ea] hover:-translate-y-0.5"
+                    )}
+                  >
+                    {paymentState === 'processing' ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin"></div>
+                        Processing...
+                      </div>
+                    ) : (
+                      `Pay ₹${selectedBooking.total?.toLocaleString()}`
+                    )}
+                  </button>
+
+                  <div className="flex items-center justify-center gap-2 mt-4 opacity-50">
+                    <Lock className="w-3 h-3" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Secured by MockStripe</span>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>,
         document.body

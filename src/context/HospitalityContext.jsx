@@ -105,6 +105,11 @@ export const HospitalityProvider = ({ children }) => {
     ];
   });
 
+  const [customers, setCustomers] = useState(() => {
+    const saved = localStorage.getItem('resto-hospitality-customers');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [inventory, setInventory] = useState(() => {
     const saved = localStorage.getItem('resto-hospitality-inventory');
     return saved ? JSON.parse(saved) : [
@@ -154,6 +159,10 @@ export const HospitalityProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('resto-hospitality-inventory', JSON.stringify(inventory));
   }, [inventory]);
+
+  useEffect(() => {
+    localStorage.setItem('resto-hospitality-customers', JSON.stringify(customers));
+  }, [customers]);
 
   useEffect(() => {
     localStorage.setItem('resto-hospitality-activity', JSON.stringify(activityLog));
@@ -406,6 +415,11 @@ export const HospitalityProvider = ({ children }) => {
     setInventory(prev => prev.filter(item => item.id !== id));
   };
 
+  const addCustomer = (customerData) => {
+    setCustomers(prev => [{ ...customerData, id: `CUST-${Date.now()}` }, ...prev]);
+    addActivity(`New customer added manually: ${customerData.name}`, 'success');
+  };
+
   return (
     <HospitalityContext.Provider value={{
       rooms, addRoom, updateRoom, deleteRoom,
@@ -417,7 +431,8 @@ export const HospitalityProvider = ({ children }) => {
       staff, addStaff, updateStaff, deleteStaff,
       tasks, addTask, updateTaskStatus, deleteTask,
       inventory, addInventoryItem, updateStock, deleteInventoryItem,
-      activityLog, addNotification
+      activityLog, addNotification,
+      customers, addCustomer
     }}>
       {children}
     </HospitalityContext.Provider>

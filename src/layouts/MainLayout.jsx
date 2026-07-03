@@ -28,6 +28,7 @@ import {
   CalendarCheck,
   Receipt,
   MessageSquare,
+  Mail,
   QrCode,
   Compass,
   ClipboardCheck,
@@ -91,6 +92,7 @@ const MainLayout = ({ children }) => {
     // Customer Specific Items (Keeping these intact just in case customer portal is used)
     { name: 'Home', icon: Home, path: '/customer/home', roles: [roles.CUSTOMER] },
     { name: 'Reservations', icon: CalendarCheck, path: '/customer/reservations', roles: [roles.CUSTOMER] },
+    { name: 'Inbox', icon: Mail, path: '/customer/messages', roles: [roles.CUSTOMER] },
     { name: 'Support', icon: HelpCircle, path: '/customer/support', roles: [roles.CUSTOMER] },
   ];
 
@@ -114,7 +116,7 @@ const MainLayout = ({ children }) => {
         >
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0 group-hover/logo:scale-110 transition-transform">
-              <img src="/1000464407-removebg-preview.png" alt="Logo" className="w-8 h-8 object-contain" />
+              <img src="/villa-logo.png" alt="Logo" className="w-8 h-8 object-contain" />
             </div>
             {!isCollapsed && (
               <span 

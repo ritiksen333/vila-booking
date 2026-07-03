@@ -36,7 +36,7 @@ const Transport = () => {
       {/* Header - Consistent with Menu/Excursions */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50 py-3 md:py-4 px-4 md:px-12 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 md:gap-3">
-          <img src="/1000464407-removebg-preview.png" alt="Logo" className="h-7 md:h-10 w-auto object-contain" />
+          <img src="/villa-logo.png" alt="Logo" className="h-7 md:h-10 w-auto object-contain" />
           <span className="text-[14px] md:text-xl font-black uppercase tracking-tighter text-[#2a2a2a]">LUMIÈRE VILLAS</span>
         </Link>
         

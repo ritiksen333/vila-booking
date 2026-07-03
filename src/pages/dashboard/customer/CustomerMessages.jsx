@@ -86,7 +86,7 @@ const CustomerMessages = () => {
               return (
                 <div key={msg.id} className={cn("flex flex-col", isMe ? "items-end" : "items-start")}>
                   <div className={cn(
-                    "max-w-[85%] lg:max-w-[70%] p-5 rounded-[2rem] text-sm font-bold leading-relaxed shadow-sm",
+                    "max-w-[85%] lg:max-w-[70%] p-5 rounded-[2rem] text-sm font-bold leading-relaxed shadow-sm whitespace-pre-wrap",
                     isMe 
                     ? "bg-primary text-white rounded-tr-none" 
                     : "bg-slate-50 text-text-primary rounded-tl-none border border-slate-100"
