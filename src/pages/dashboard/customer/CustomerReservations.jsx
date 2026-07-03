@@ -1,356 +1,260 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { 
-  Calendar, 
+  Calendar as CalendarIcon, 
   Clock, 
-  Plus, 
-  ChevronRight, 
-  X, 
-  Bed, 
-  Table2, 
-  Car, 
-  Sparkles,
-  Search,
-  CalendarCheck,
-  History,
-  AlertCircle,
-  CheckCircle2,
+  CheckCircle2, 
+  XCircle,
+  CreditCard,
+  X,
   MapPin,
-  Users,
-  Printer
+  ChevronRight,
+  Info
 } from 'lucide-react';
 import { cn } from "../../../utils/cn";
 import { useHospitality } from "../../../context/HospitalityContext";
-import { useCustomer } from "../../../context/CustomerContext";
-import { useNavigate } from 'react-router-dom';
-import printContent from '../../../utils/printUtil';
+import { useAuth } from "../../../context/AuthContext";
 
 const CustomerReservations = () => {
-  const { reservations, addReservation } = useHospitality();
-  const { profile } = useCustomer();
-  const navigate = useNavigate();
-  const [showAddRes, setShowAddRes] = useState(false);
-  const [activeTab, setActiveTab] = useState('All');
-  const [selectedResForPrint, setSelectedResForPrint] = useState(null);
-
-  const [newResData, setNewResData] = useState({
-    type: 'Table',
-    targetId: '',
-    date: '',
-    time: '',
-    guests: 2,
-    notes: ''
-  });
-
-  // Filter reservations for current customer
-  const myReservations = reservations.filter(res => res.guestName === profile.name);
+  const { reservations, cancelReservation, updateReservation } = useHospitality();
+  const { user } = useAuth();
   
-  const filteredRes = myReservations.filter(res => {
-    if (activeTab === 'All') return true;
-    if (activeTab === 'Upcoming') return ['Confirmed', 'Pending'].includes(res.status);
-    if (activeTab === 'Past') return ['Checked In', 'Cancelled'].includes(res.status);
-    return true;
-  });
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showToast, setShowToast] = useState(null);
 
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'Confirmed': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
-      case 'Pending': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
-      case 'Cancelled': return 'bg-rose-500/10 text-rose-500 border-rose-500/20';
-      case 'Checked In': return 'bg-primary/10 text-primary border-primary/20';
-      default: return 'bg-slate-500/10 text-slate-500 border-slate-500/20';
+  const displayToast = (msg, type = 'success') => {
+    setShowToast({ msg, type });
+    setTimeout(() => setShowToast(null), 3000);
+  };
+
+  // Only show bookings for this specific logged-in user
+  const myBookings = reservations.filter(r => r.guestName === user?.name).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  const getStatusConfig = (status) => {
+    switch(status) {
+      case 'Confirmed': return { color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', icon: CheckCircle2 };
+      case 'Pending': return { color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', icon: Clock };
+      case 'Cancelled': return { color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100', icon: XCircle };
+      case 'Checked In': return { color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100', icon: CheckCircle2 };
+      default: return { color: 'text-slate-600', bg: 'bg-slate-50', border: 'border-slate-100', icon: Clock };
     }
   };
 
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case 'Table': return Table2;
-      case 'Room': return Bed;
-      case 'Transport': return Car;
-      default: return Calendar;
+  const handleCancelBooking = () => {
+    if (selectedBooking) {
+      cancelReservation(selectedBooking.id);
+      displayToast('Booking cancelled successfully');
+      setSelectedBooking(null);
     }
   };
 
-  const handleCreateRes = (e) => {
+  const handleProcessPayment = (e) => {
     e.preventDefault();
-    addReservation({
-      ...newResData,
-      guestName: profile.name,
-      status: 'Pending',
-      id: `RES-${Math.floor(1000 + Math.random() * 9000)}`
-    });
-    setNewResData({ type: 'Table', targetId: '', date: '', time: '', guests: 2, notes: '' });
-    setShowAddRes(false);
-    alert('Reservation request sent! We will notify you once confirmed.');
+    if (selectedBooking) {
+      // Simulate Payment Process
+      updateReservation(selectedBooking.id, { status: 'Confirmed', paymentStatus: 'Paid' });
+      displayToast('Payment processed successfully. Booking is now Confirmed!');
+      setShowPaymentModal(false);
+      setSelectedBooking(null);
+    }
   };
 
   return (
-    <div className="space-y-6 lg:space-y-8 pb-24 lg:pb-0">
-      {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-           <div className="flex items-center gap-2 mb-2">
-              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                 <CalendarCheck className="w-6 h-6" />
-              </div>
-              <h2 className="text-2xl lg:text-3xl font-black text-text-primary uppercase tracking-tight">Your <span className="text-primary">Bookings</span></h2>
-           </div>
-           <p className="text-text-secondary text-xs lg:text-sm font-medium">Manage your table and stay reservations.</p>
-        </div>
-        <button 
-          onClick={() => setShowAddRes(true)}
-          className="btn-primary px-8 py-4 rounded-2xl flex items-center justify-center gap-3 font-black uppercase text-[10px] tracking-widest shadow-xl shadow-primary/20 active:scale-95 transition-all"
-        >
-          <Plus className="w-5 h-5" /> New Reservation
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 shrink-0">
-        {['All', 'Upcoming', 'Past'].map(tab => (
-          <button 
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={cn(
-              "px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 whitespace-nowrap transition-all",
-              activeTab === tab 
-              ? "bg-primary text-white border-primary shadow-lg shadow-primary/10" 
-              : "bg-white text-text-secondary border-transparent hover:bg-slate-50"
-            )}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Reservations List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredRes.length === 0 ? (
-          <div className="col-span-full card p-12 bg-white border-none shadow-xl shadow-slate-100/50 flex flex-col items-center text-center">
-             <div className="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mb-6">
-                <Calendar className="w-10 h-10 text-slate-200" />
-             </div>
-             <h3 className="text-lg font-black text-text-primary uppercase tracking-tight">No Reservations Found</h3>
-             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2 max-w-xs">You haven't made any bookings yet. Book a table or room to see it here.</p>
-             <button 
-               onClick={() => setShowAddRes(true)}
-               className="mt-8 text-[10px] font-black text-primary uppercase tracking-[0.2em] hover:underline"
-             >
-                Make your first booking
-             </button>
+    <div className="space-y-6 lg:space-y-8 pb-20 lg:pb-0 h-full flex flex-col">
+      {/* Toast Notification */}
+      {showToast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] animate-in slide-in-from-top-4 fade-in duration-300">
+          <div className={cn(
+            "px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 border",
+            showToast.type === 'error' ? "bg-rose-50 border-rose-100 text-rose-600" : "bg-emerald-50 text-emerald-600 border-emerald-100"
+          )}>
+            <Info className="w-5 h-5" />
+            <span className="font-bold text-sm">{showToast.msg}</span>
           </div>
-        ) : (
-          filteredRes.map((res) => {
-            const TypeIcon = getTypeIcon(res.type);
+        </div>
+      )}
+
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl lg:text-4xl font-black text-text-primary tracking-tight leading-tight uppercase">
+          My <span className="text-primary">Bookings</span>
+        </h1>
+        <p className="text-text-secondary mt-1 text-sm font-medium">Manage your villa reservations and payments.</p>
+      </div>
+
+      {myBookings.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center bg-white border border-slate-100 rounded-[2rem] p-10 text-center">
+          <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+            <CalendarIcon className="w-10 h-10 text-slate-300" />
+          </div>
+          <h3 className="text-xl font-black text-text-primary uppercase tracking-tight mb-2">No Bookings Yet</h3>
+          <p className="text-sm font-bold text-slate-400">You haven't made any villa reservations yet.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {myBookings.map(booking => {
+            const config = getStatusConfig(booking.status);
+            const StatusIcon = config.icon;
+            const isPending = booking.status === 'Pending';
+            
             return (
               <div 
-                key={res.id}
-                className="card bg-white border-none shadow-xl shadow-slate-100/50 p-6 rounded-[2.5rem] group hover:bg-slate-50 transition-all relative overflow-hidden"
+                key={booking.id}
+                onClick={() => setSelectedBooking(booking)}
+                className="card bg-white border-none shadow-xl shadow-slate-100/50 p-6 rounded-[2rem] hover:shadow-2xl hover:shadow-slate-200/50 transition-all cursor-pointer group"
               >
-                <div className="absolute top-0 right-0 p-4 z-20">
-                   <button 
-                     onClick={() => { setSelectedResForPrint(res); setTimeout(() => printContent('printable-area'), 200); }}
-                     className="p-2.5 bg-white/80 backdrop-blur-md rounded-xl text-slate-400 hover:text-primary transition-all shadow-sm opacity-0 group-hover:opacity-100 no-print"
-                   >
-                      <Printer className="w-4 h-4" />
-                   </button>
-                </div>
-                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform" />
-                
                 <div className="flex justify-between items-start mb-6">
-                   <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                      <TypeIcon className="w-6 h-6" />
-                   </div>
-                   <div className={cn("px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest border", getStatusStyle(res.status))}>
-                      {res.status}
-                   </div>
+                  <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner">
+                    <CalendarIcon className="w-6 h-6 text-slate-400" />
+                  </div>
+                  <div className={cn("px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border flex items-center gap-1.5", config.bg, config.color, config.border)}>
+                    <StatusIcon className="w-3 h-3" />
+                    {booking.status}
+                  </div>
                 </div>
 
                 <div className="space-y-4">
-                   <div>
-                      <h4 className="text-lg font-black text-text-primary uppercase tracking-tight">{res.type} Reservation</h4>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{res.targetId || 'ID Pending'}</p>
-                   </div>
+                  <div>
+                    <h3 className="text-xl font-black text-text-primary tracking-tight uppercase">{booking.targetId}</h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Booking ID: {booking.id}</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <div>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Check-in</p>
+                      <p className="text-xs font-bold text-slate-700">{booking.date}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Check-out</p>
+                      <p className="text-xs font-bold text-slate-700">{booking.checkOut || '-'}</p>
+                    </div>
+                  </div>
+                </div>
 
-                   <div className="grid grid-cols-2 gap-4 pt-2">
-                      <div className="flex items-center gap-3">
-                         <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400">
-                            <Calendar className="w-4 h-4" />
-                         </div>
-                         <p className="text-[10px] font-black text-text-primary uppercase tracking-tight leading-none">{res.date}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                         <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400">
-                            <Clock className="w-4 h-4" />
-                         </div>
-                         <p className="text-[10px] font-black text-text-primary uppercase tracking-tight leading-none">{res.time}</p>
-                      </div>
-                   </div>
-
-                   <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                      <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                         <Users className="w-3.5 h-3.5" /> {res.guests} Guests
-                      </div>
-                      <span className="text-[9px] font-black text-primary uppercase tracking-widest">#{res.id}</span>
-                   </div>
+                <div className="mt-6 pt-5 border-t border-slate-50 flex items-center justify-between">
+                  <div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Amount</p>
+                    <p className="text-lg font-black text-primary">₹{booking.total?.toLocaleString() || 0}</p>
+                  </div>
+                  <div className="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-white" />
+                  </div>
                 </div>
               </div>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
 
-      {/* Add Reservation Modal */}
-      {showAddRes && createPortal(
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-0 sm:p-4">
-          <div onClick={() => setShowAddRes(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
-          <div className="relative w-full max-w-[95%] md:max-w-lg bg-white rounded-t-[2.5rem] sm:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] self-end sm:self-center animate-in fade-in slide-in-from-bottom-4 sm:zoom-in duration-300">
-            <div className="px-6 py-5 md:px-8 md:py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30 shrink-0">
-               <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                     <Plus className="w-5 h-5 text-primary stroke-[3]" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg md:text-xl font-black uppercase tracking-tight leading-none">New Booking</h3>
-                    <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5 md:mt-1 leading-none">Schedule your hospitality experience</p>
-                  </div>
-               </div>
-               <button onClick={() => setShowAddRes(false)} className="p-2 hover:bg-white rounded-xl border border-transparent hover:border-slate-100 transition-all shadow-sm"><X className="w-5 h-5 text-slate-400" /></button>
+      {/* Booking Details Modal */}
+      {selectedBooking && !showPaymentModal && createPortal(
+        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setSelectedBooking(null)} />
+          <div className="relative w-full max-w-md bg-white rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="p-8 border-b border-slate-50 bg-slate-50/30 flex justify-between items-start">
+              <div>
+                <h3 className="text-2xl font-black text-text-primary uppercase tracking-tight">{selectedBooking.targetId}</h3>
+                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">{selectedBooking.id}</p>
+              </div>
+              <button onClick={() => setSelectedBooking(null)} className="p-2 hover:bg-white rounded-xl transition-all">
+                <X className="w-6 h-6 text-slate-400" />
+              </button>
             </div>
-            <form onSubmit={handleCreateRes} className="flex-1 overflow-y-auto scrollbar-hide">
-              <div className="p-6 md:p-8 space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Booking Type</label>
-                    <div className="flex gap-2">
-                       {['Table', 'Room', 'Transport'].map(type => (
-                         <button
-                           key={type}
-                           type="button"
-                           onClick={() => setNewResData({...newResData, type})}
-                           className={cn(
-                             "flex-1 py-3 rounded-xl border-2 transition-all text-center",
-                             newResData.type === type 
-                             ? "bg-primary/5 border-primary text-primary" 
-                             : "bg-slate-50 border-transparent text-slate-400 hover:bg-slate-100"
-                           )}
-                         >
-                            <p className="text-[9px] font-black uppercase tracking-tight">{type}</p>
-                         </button>
-                       ))}
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Guests</label>
-                    <input 
-                      type="number"
-                      min="1"
-                      value={newResData.guests}
-                      onChange={(e) => setNewResData({...newResData, guests: parseInt(e.target.value)})}
-                      className="w-full px-5 py-3.5 bg-slate-50 rounded-2xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary/20 focus:bg-white transition-all shadow-sm"
-                    />
-                  </div>
+            
+            <div className="p-8 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Check In</p>
+                  <p className="text-sm font-bold text-text-primary">{selectedBooking.date}</p>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Preferred Date</label>
-                    <input 
-                      type="date"
-                      required
-                      value={newResData.date}
-                      onChange={(e) => setNewResData({...newResData, date: e.target.value})}
-                      className="w-full px-5 py-3.5 bg-slate-50 rounded-2xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary/20 focus:bg-white transition-all shadow-sm"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Preferred Time</label>
-                    <input 
-                      type="time"
-                      required
-                      value={newResData.time}
-                      onChange={(e) => setNewResData({...newResData, time: e.target.value})}
-                      className="w-full px-5 py-3.5 bg-slate-50 rounded-2xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary/20 focus:bg-white transition-all shadow-sm"
-                    />
-                  </div>
+                <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Check Out</p>
+                  <p className="text-sm font-bold text-text-primary">{selectedBooking.checkOut || '-'}</p>
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Special Notes</label>
-                  <textarea 
-                    value={newResData.notes}
-                    onChange={(e) => setNewResData({...newResData, notes: e.target.value})}
-                    className="w-full px-5 py-3.5 bg-slate-50 rounded-2xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary/20 focus:bg-white h-24 resize-none transition-all shadow-sm"
-                    placeholder="Any specific requests or requirements..."
-                  />
+                <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Guests</p>
+                  <p className="text-sm font-bold text-text-primary">{selectedBooking.guests} People</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                  <p className={cn("text-sm font-bold", getStatusConfig(selectedBooking.status).color)}>{selectedBooking.status}</p>
                 </div>
               </div>
 
-              <div className="p-6 md:p-8 border-t border-slate-50 bg-white shrink-0 relative z-20">
-                <button className="w-full btn-primary py-4 rounded-2xl flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20 active:scale-95 transition-all">
-                  Send Booking Request
+              <div className="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-50 flex justify-between items-center">
+                <div>
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Total Amount</p>
+                  <p className="text-2xl font-black text-indigo-600">₹{selectedBooking.total?.toLocaleString() || 0}</p>
+                </div>
+                {selectedBooking.paymentStatus === 'Paid' && (
+                  <span className="bg-emerald-500 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">Paid</span>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="p-6 bg-slate-50 flex gap-4">
+              {['Pending', 'Confirmed'].includes(selectedBooking.status) && (
+                <button 
+                  onClick={handleCancelBooking}
+                  className="flex-1 h-14 bg-white border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-600 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all flex items-center justify-center gap-2"
+                >
+                  <XCircle className="w-4 h-4" /> Cancel Booking
                 </button>
+              )}
+              
+              {selectedBooking.status === 'Pending' && selectedBooking.paymentStatus !== 'Paid' && (
+                <button 
+                  onClick={() => setShowPaymentModal(true)}
+                  className="flex-1 h-14 btn-primary rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20 flex items-center justify-center gap-2"
+                >
+                  <CreditCard className="w-4 h-4" /> Pay Now
+                </button>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Payment Modal */}
+      {showPaymentModal && selectedBooking && createPortal(
+        <div className="fixed inset-0 z-[700] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setShowPaymentModal(false)} />
+          <div className="relative w-full max-w-sm bg-white rounded-[3rem] p-8 shadow-2xl animate-in zoom-in duration-300">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-500">
+                <CreditCard className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-black text-text-primary uppercase tracking-tight">Complete Payment</h3>
+              <p className="text-sm font-bold text-slate-400 mt-2">Amount due: ₹{selectedBooking.total?.toLocaleString()}</p>
+            </div>
+
+            <form onSubmit={handleProcessPayment} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Card Number</label>
+                <input required type="text" placeholder="**** **** **** ****" className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-primary text-sm font-bold" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Expiry</label>
+                  <input required type="text" placeholder="MM/YY" className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-primary text-sm font-bold" />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">CVC</label>
+                  <input required type="password" placeholder="***" className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:border-primary text-sm font-bold" />
+                </div>
+              </div>
+
+              <div className="pt-4 flex gap-4">
+                <button type="button" onClick={() => setShowPaymentModal(false)} className="flex-1 h-12 bg-slate-100 rounded-xl text-xs font-black uppercase tracking-widest text-slate-500 hover:bg-slate-200">Cancel</button>
+                <button type="submit" className="flex-1 h-12 btn-primary rounded-xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20">Pay ₹{selectedBooking.total?.toLocaleString()}</button>
               </div>
             </form>
           </div>
         </div>,
         document.body
-      )}
-      {/* Hidden Printable Reservation */}
-      {selectedResForPrint && (
-        <div id="printable-area" className="hidden print:block printable-area receipt-print">
-          <div className="text-center border-b-2 border-slate-900 pb-4 mb-4">
-            <h1 className="text-xl font-black uppercase tracking-tighter">THE LUXE GRANDE</h1>
-            <p className="text-[10px] font-bold uppercase tracking-widest mt-1">Booking Confirmation</p>
-          </div>
-          
-          <div className="space-y-4">
-             <div className="flex justify-between items-start">
-                <div>
-                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Booking For</p>
-                   <p className="text-sm font-black uppercase">{profile.name}</p>
-                </div>
-                <div className="text-right">
-                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Booking ID</p>
-                   <p className="text-sm font-black">#{selectedResForPrint.id}</p>
-                </div>
-             </div>
-
-             <div className="py-4 border-y border-slate-900 grid grid-cols-2 gap-4">
-                <div>
-                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Type</p>
-                   <p className="text-xs font-black uppercase">{selectedResForPrint.type} • {selectedResForPrint.targetId || 'Pending'}</p>
-                </div>
-                <div className="text-right">
-                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Guests</p>
-                   <p className="text-xs font-black uppercase">{selectedResForPrint.guests} Person(s)</p>
-                </div>
-             </div>
-
-             <div className="flex justify-between items-center py-2">
-                <div>
-                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Date</p>
-                   <p className="text-xs font-black uppercase">{selectedResForPrint.date}</p>
-                </div>
-                <div className="text-right">
-                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Time</p>
-                   <p className="text-xs font-black uppercase">{selectedResForPrint.time}</p>
-                </div>
-             </div>
-
-             {selectedResForPrint.notes && (
-                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Notes</p>
-                   <p className="text-[10px] font-bold italic">"{selectedResForPrint.notes}"</p>
-                </div>
-             )}
-          </div>
-
-          <div className="text-center pt-8 border-t border-slate-200">
-            <p className="text-[9px] font-black uppercase tracking-widest">Confirmation Slip</p>
-            <p className="text-[8px] font-bold text-slate-400 mt-1 uppercase">Please present this at arrival</p>
-          </div>
-        </div>
       )}
     </div>
   );

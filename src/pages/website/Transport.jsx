@@ -37,7 +37,7 @@ const Transport = () => {
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50 py-3 md:py-4 px-4 md:px-12 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 md:gap-3">
           <img src="/1000464407-removebg-preview.png" alt="Logo" className="h-7 md:h-10 w-auto object-contain" />
-          <span className="text-[14px] md:text-xl font-black uppercase tracking-tighter text-[#2a2a2a]">Gila House</span>
+          <span className="text-[14px] md:text-xl font-black uppercase tracking-tighter text-[#2a2a2a]">LUMIÈRE VILLAS</span>
         </Link>
         
         <nav className="hidden md:flex items-center gap-4 lg:gap-8">
@@ -99,7 +99,7 @@ const Transport = () => {
 
         <div className="mt-16 md:mt-32 text-center">
            <div className="inline-flex items-center gap-2 text-[10px] md:text-xs font-black text-gray-300 uppercase tracking-widest">
-              Contact us for custom routes <ChevronRight size={14} /> Gila House Concierge
+              Contact us for custom routes <ChevronRight size={14} /> LUMIÈRE VILLAS Concierge
            </div>
         </div>
       </main>

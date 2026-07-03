@@ -32,7 +32,7 @@ const GuestDashboard = () => {
           <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
             <img src="/1000464407-removebg-preview.png" alt="Logo" className="w-5 h-auto brightness-0 invert" />
           </div>
-          <span className="text-lg font-black uppercase tracking-tighter text-slate-800">Gila House</span>
+          <span className="text-lg font-black uppercase tracking-tighter text-slate-800">LUMIÈRE VILLAS</span>
         </div>
 
         {/* Welcome Toast - Floating Style */}

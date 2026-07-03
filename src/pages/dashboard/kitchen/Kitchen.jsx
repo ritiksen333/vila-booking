@@ -509,7 +509,7 @@ const Kitchen = () => {
           </div>
 
           <div className="text-center pt-2">
-            <p className="text-[9px] font-black uppercase tracking-widest">Gila House Kitchen Display System</p>
+            <p className="text-[9px] font-black uppercase tracking-widest">LUMIÈRE VILLAS Kitchen Display System</p>
           </div>
         </div>
       )}

@@ -165,6 +165,8 @@ export const HospitalityProvider = ({ children }) => {
     setActivityLog(prev => [{ id: Date.now(), message, time: 'Just now', type }, ...prev].slice(0, 20));
   };
 
+
+
   const createFolio = (guestName, roomName) => {
     const room = rooms.find(r => r.name === roomName);
     const newFolio = {

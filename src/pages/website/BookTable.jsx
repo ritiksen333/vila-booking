@@ -30,7 +30,7 @@ const BookTable = () => {
       <header className="bg-white border-b border-gray-100 sticky top-0 z-50 py-4 px-6 md:px-12 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <span className="text-orange-500 text-2xl">🧡</span>
-          <span className="text-xl font-black uppercase tracking-tighter text-[#2a2a2a]">Gila House</span>
+          <span className="text-xl font-black uppercase tracking-tighter text-[#2a2a2a]">LUMIÈRE VILLAS</span>
         </Link>
         
         <nav className="hidden md:flex items-center gap-8">
@@ -52,7 +52,7 @@ const BookTable = () => {
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-[#1e8a75] uppercase tracking-tighter mb-4">Reserve a Table</h1>
           <p className="text-sm md:text-lg text-[#1e8a75]/70 font-bold uppercase tracking-widest">
-            Book your dining experience at Gila House
+            Book your dining experience at LUMIÈRE VILLAS
           </p>
         </div>
       </section>
@@ -187,7 +187,7 @@ const BookTable = () => {
 
         <div className="mt-20 text-center">
            <div className="inline-flex items-center gap-2 text-xs font-black text-gray-300 uppercase tracking-widest">
-              Visit us to order <ChevronRight size={14} /> Gila House Restaurant & Bar
+              Visit us to order <ChevronRight size={14} /> LUMIÈRE VILLAS Restaurant & Bar
            </div>
         </div>
       </main>

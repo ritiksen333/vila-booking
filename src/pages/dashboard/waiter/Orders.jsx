@@ -593,7 +593,7 @@ const Orders = () => {
 
           <div className="text-center pt-4 border-t border-slate-200">
             <p className="text-[9px] font-black uppercase tracking-widest">Thank you for dining with us!</p>
-            <p className="text-[8px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">Visit again soon • Gila House Systems</p>
+            <p className="text-[8px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">Visit again soon • LUMIÈRE VILLAS Systems</p>
           </div>
         </div>
       )}

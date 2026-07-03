@@ -299,7 +299,7 @@ const CustomerSupport = () => {
                   <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><Mail className="w-5 h-5" /></div>
                   <div>
                      <p className="text-[11px] font-black uppercase tracking-tight leading-none group-hover:text-primary transition-colors">Email Us</p>
-                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">support@gilahouse.com</p>
+                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">support@lumierevillas.com</p>
                   </div>
                </div>
                <ArrowRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-transform" />
@@ -497,11 +497,11 @@ const CustomerSupport = () => {
                </div>
                <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner">
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Official Support</p>
-                  <p className="text-lg md:text-xl font-black text-text-primary tracking-tight">support@gilahouse.com</p>
+                  <p className="text-lg md:text-xl font-black text-text-primary tracking-tight">support@lumierevillas.com</p>
                </div>
                <div className="flex flex-col gap-4">
                   <a 
-                    href="mailto:support@gilahouse.com?subject=Support Request - Gila House&body=Hello Support Team,"
+                    href="mailto:support@lumierevillas.com?subject=Support Request - LUMIÈRE VILLAS&body=Hello Support Team,"
                     className="w-full py-4 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20 flex items-center justify-center gap-3 active:scale-95 transition-all"
                   >
                     <Mail className="w-4 h-4" /> Compose Email

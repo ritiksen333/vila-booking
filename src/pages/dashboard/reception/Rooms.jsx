@@ -6,40 +6,42 @@ import {
   Filter, 
   X, 
   ChevronRight, 
-  Bed, 
+  Home, 
   Users, 
   Clock, 
   Sparkles,
-  MoreVertical,
-  CheckCircle2,
   AlertCircle,
   Wrench,
-  Trash2
+  Trash2,
+  Edit2
 } from 'lucide-react';
 import { cn } from "../../../utils/cn";
 import { useHospitality } from "../../../context/HospitalityContext";
 
-const Rooms = () => {
-  const { rooms, addRoom, updateRoom, deleteRoom } = useHospitality();
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [showAddRoom, setShowAddRoom] = useState(false);
+const Villas = () => {
+  const { rooms: villas, addRoom: addVilla, updateRoom: updateVilla, deleteRoom: deleteVilla } = useHospitality();
+  const [selectedVilla, setSelectedVilla] = useState(null);
+  const [showAddVilla, setShowAddVilla] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All');
 
-  const [newRoomData, setNewRoomData] = useState({ 
+  const [formData, setFormData] = useState({ 
     name: '', 
     type: 'Deluxe', 
     capacity: 2, 
     status: 'Available',
+    price: 4500,
     notes: '' 
   });
 
-  const roomTypes = ['Standard', 'Deluxe', 'Suite', 'Executive'];
-  const roomStatuses = ['Available', 'Occupied', 'Reserved', 'Cleaning', 'Maintenance'];
+  const villaTypes = ['Standard', 'Deluxe', 'Suite', 'Presidential'];
+  const villaStatuses = ['Available', 'Occupied', 'Reserved', 'Cleaning', 'Maintenance'];
 
   const getStatusConfig = (status) => {
     switch (status) {
-      case 'Available': return { color: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100', icon: CheckCircle2 };
+      case 'Available': return { color: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100', icon: Home };
       case 'Occupied': return { color: 'bg-rose-500', bg: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-100', icon: Users };
       case 'Reserved': return { color: 'bg-primary', bg: 'bg-indigo-50', text: 'text-primary', border: 'border-indigo-100', icon: Clock };
       case 'Cleaning': return { color: 'bg-amber-500', bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100', icon: Sparkles };
@@ -48,25 +50,59 @@ const Rooms = () => {
     }
   };
 
-  const filteredRooms = rooms.filter(room => {
-    const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          room.assignedGuest?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === 'All' || room.status === activeTab;
+  const filteredVillas = villas.filter(villa => {
+    const matchesSearch = villa.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          villa.assignedGuest?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTab = activeTab === 'All' || villa.status === activeTab;
     return matchesSearch && matchesTab;
   });
 
-  const handleCreateRoom = (e) => {
+  const handleCreateOrUpdate = (e) => {
     e.preventDefault();
-    addRoom({
-      roomName: newRoomData.name,
-      roomType: newRoomData.type,
-      capacity: parseInt(newRoomData.capacity),
-      status: newRoomData.status,
-      assignedGuest: null,
-      notes: newRoomData.notes
+    if (!formData.name.trim()) return;
+
+    if (isEditing && selectedVilla) {
+      updateVilla(selectedVilla.id, {
+        name: formData.name,
+        type: formData.type,
+        capacity: parseInt(formData.capacity),
+        status: formData.status,
+        price: parseInt(formData.price) || 0,
+        notes: formData.notes
+      });
+      setIsEditing(false);
+      setSelectedVilla({ ...selectedVilla, ...formData, capacity: parseInt(formData.capacity), price: parseInt(formData.price) });
+    } else {
+      addVilla({
+        name: formData.name,
+        type: formData.type,
+        capacity: parseInt(formData.capacity),
+        status: formData.status,
+        price: parseInt(formData.price) || 0,
+        assignedGuest: null,
+        notes: formData.notes
+      });
+      setShowAddVilla(false);
+    }
+    setFormData({ name: '', type: 'Deluxe', capacity: 2, status: 'Available', price: 4500, notes: '' });
+  };
+
+  const handleDelete = () => {
+    deleteVilla(selectedVilla.id);
+    setShowDeleteConfirm(false);
+    setSelectedVilla(null);
+  };
+
+  const openEdit = (villa) => {
+    setFormData({
+      name: villa.name,
+      type: villa.type,
+      capacity: villa.capacity,
+      status: villa.status,
+      price: villa.price || 0,
+      notes: villa.notes || ''
     });
-    setNewRoomData({ name: '', type: 'Deluxe', capacity: 2, status: 'Available', notes: '' });
-    setShowAddRoom(false);
+    setIsEditing(true);
   };
 
   return (
@@ -75,11 +111,11 @@ const Rooms = () => {
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-xl shadow-primary/20">
-            <Bed className="w-6 h-6 stroke-[2.5]" />
+            <Home className="w-6 h-6 stroke-[2.5]" />
           </div>
           <div>
-            <h2 className="text-2xl font-black tracking-tight text-text-primary uppercase tracking-wider">Rooms Management</h2>
-            <p className="text-text-secondary text-sm font-bold mt-1">Total {rooms.length} Units • {rooms.filter(r => r.status === 'Available').length} Ready</p>
+            <h2 className="text-2xl font-black tracking-tight text-text-primary uppercase tracking-wider">Villas Management</h2>
+            <p className="text-text-secondary text-sm font-bold mt-1">Total {villas.length} Villas • {villas.filter(r => r.status === 'Available').length} Ready</p>
           </div>
         </div>
         
@@ -88,24 +124,28 @@ const Rooms = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary transition-colors" />
             <input 
               type="text" 
-              placeholder="Search rooms or guests..." 
+              placeholder="Search villas or guests..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-5 py-3 bg-white border border-slate-100 rounded-2xl outline-none shadow-sm text-sm font-bold focus:ring-4 focus:ring-primary/5 transition-all"
             />
           </div>
           <button 
-            onClick={() => setShowAddRoom(true)}
+            onClick={() => {
+              setFormData({ name: '', type: 'Deluxe', capacity: 2, status: 'Available', price: 4500, notes: '' });
+              setIsEditing(false);
+              setShowAddVilla(true);
+            }}
             className="btn-primary h-[48px] px-6 rounded-2xl flex items-center gap-3 font-black uppercase text-[10px] tracking-widest shadow-xl shadow-primary/20 active:scale-95 transition-all"
           >
-            <Plus className="w-5 h-5" /> New Room
+            <Plus className="w-5 h-5" /> New Villa
           </button>
         </div>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1 shrink-0">
-        {['All', ...roomStatuses].map(tab => (
+        {['All', ...villaStatuses].map(tab => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -121,35 +161,41 @@ const Rooms = () => {
         ))}
       </div>
 
-      {/* Rooms Grid */}
+      {/* Villas Grid */}
       <div className="flex-1 overflow-y-auto scrollbar-hide -mx-1 px-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5 pb-10">
-          {filteredRooms.map((room) => {
-            const config = getStatusConfig(room.status);
+          {filteredVillas.map((villa) => {
+            const config = getStatusConfig(villa.status);
             const StatusIcon = config.icon;
             return (
               <div 
-                key={room.id}
-                onClick={() => setSelectedRoom(room)}
+                key={villa.id}
+                onClick={() => setSelectedVilla(villa)}
                 className="group card bg-white border-none shadow-xl shadow-slate-100/50 p-5 rounded-[2.5rem] hover:bg-slate-50 transition-all cursor-pointer relative overflow-hidden"
               >
                 <div className={cn("absolute top-0 right-0 w-24 h-24 rounded-full -mr-12 -mt-12 opacity-10", config.color)} />
                 
                 <div className="flex justify-between items-start mb-6">
                   <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg", config.bg, config.text)}>
-                    <Bed className="w-6 h-6" />
+                    <Home className="w-6 h-6" />
                   </div>
                   <div className={cn("px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border", config.bg, config.text, config.border)}>
-                    {room.status}
+                    {villa.status}
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-xl font-black text-text-primary tracking-tight">{room.name}</h3>
+                  <h3 className="text-xl font-black text-text-primary tracking-tight">{villa.name}</h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{room.type}</span>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{villa.type}</span>
                     <span className="w-1 h-1 bg-slate-300 rounded-full" />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cap: {room.capacity}</span>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cap: {villa.capacity}</span>
+                    {villa.price && (
+                      <>
+                        <span className="w-1 h-1 bg-slate-300 rounded-full" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">₹{villa.price}/night</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -157,7 +203,7 @@ const Rooms = () => {
                   <div className="flex items-center gap-2">
                     <StatusIcon className={cn("w-4 h-4", config.text)} />
                     <span className="text-[11px] font-bold text-text-primary">
-                      {room.assignedGuest || 'No Guest'}
+                      {villa.assignedGuest || 'No Guest'}
                     </span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
@@ -166,106 +212,181 @@ const Rooms = () => {
             );
           })}
         </div>
-      </div>      {/* Modals */}
-      {showAddRoom && createPortal(
+      </div>
+
+      {/* Villa Details Modal */}
+      {selectedVilla && !isEditing && !showDeleteConfirm && createPortal(
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+          <div onClick={() => setSelectedVilla(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+          <div className="relative w-full max-w-lg bg-white rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="p-8 border-b border-slate-50 bg-slate-50/30">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-2xl font-black text-text-primary uppercase tracking-tight">{selectedVilla.name}</h3>
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Villa #{selectedVilla.id}</p>
+                </div>
+                <button onClick={() => setSelectedVilla(null)} className="p-2 hover:bg-white rounded-xl transition-all text-slate-400"><X className="w-6 h-6" /></button>
+              </div>
+            </div>
+            
+            <div className="p-8 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 rounded-2xl p-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</p>
+                  <p className={cn("text-sm font-black mt-1", getStatusConfig(selectedVilla.status).text)}>{selectedVilla.status}</p>
+                </div>
+                <div className="bg-slate-50 rounded-2xl p-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Price / Night</p>
+                  <p className="text-sm font-black text-text-primary mt-1">₹{selectedVilla.price}</p>
+                </div>
+                <div className="bg-slate-50 rounded-2xl p-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</p>
+                  <p className="text-sm font-black text-text-primary mt-1">{selectedVilla.type}</p>
+                </div>
+                <div className="bg-slate-50 rounded-2xl p-4">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Capacity</p>
+                  <p className="text-sm font-black text-text-primary mt-1">{selectedVilla.capacity} Guests</p>
+                </div>
+              </div>
+              {selectedVilla.notes && (
+                <div className="bg-indigo-50/50 rounded-2xl p-4 border border-indigo-50">
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Notes</p>
+                  <p className="text-sm font-bold text-indigo-900 mt-1">{selectedVilla.notes}</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="p-6 bg-slate-50 flex gap-4">
+              <button 
+                onClick={() => openEdit(selectedVilla)}
+                className="flex-1 h-14 bg-white border border-slate-200 rounded-2xl flex items-center justify-center gap-2 text-sm font-black uppercase tracking-widest hover:border-primary hover:text-primary transition-all text-slate-600"
+              >
+                <Edit2 className="w-4 h-4" /> Edit
+              </button>
+              <button 
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex-1 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center gap-2 text-sm font-black uppercase tracking-widest hover:bg-rose-100 transition-all"
+              >
+                <Trash2 className="w-4 h-4" /> Delete
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && createPortal(
+        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4">
+          <div onClick={() => setShowDeleteConfirm(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-white rounded-[3rem] p-8 shadow-2xl text-center">
+            <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Trash2 className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-black text-text-primary uppercase tracking-tight">Delete Villa?</h3>
+            <p className="text-sm font-bold text-text-secondary mt-2">Are you sure you want to delete {selectedVilla?.name}? This action cannot be undone.</p>
+            <div className="flex gap-4 mt-8">
+              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 h-12 bg-slate-100 rounded-xl font-black uppercase tracking-widest text-xs text-slate-600 hover:bg-slate-200">Cancel</button>
+              <button onClick={handleDelete} className="flex-1 h-12 bg-rose-500 text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-rose-600 shadow-lg shadow-rose-500/20">Delete</button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Add / Edit Form Modal */}
+      {(showAddVilla || isEditing) && createPortal(
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-0 sm:p-4">
-          <div onClick={() => setShowAddRoom(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
+          <div onClick={() => { setShowAddVilla(false); setIsEditing(false); }} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
           <div className="relative w-full max-w-[95%] md:max-w-lg bg-white rounded-t-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] self-end sm:self-center animate-in fade-in slide-in-from-bottom-4 sm:zoom-in duration-300">
             <div className="px-6 py-5 md:px-8 md:py-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/30 shrink-0">
                <div className="flex items-center gap-4">
                   <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                     <Plus className="w-5 h-5 text-primary stroke-[3]" />
+                     {isEditing ? <Edit2 className="w-5 h-5 text-primary stroke-[3]" /> : <Plus className="w-5 h-5 text-primary stroke-[3]" />}
                   </div>
                   <div>
-                    <h3 className="text-lg md:text-xl font-black uppercase tracking-tight leading-none">Add New Unit</h3>
-                    <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5 md:mt-1 leading-none">Register and configure hospitality space</p>
+                    <h3 className="text-lg md:text-xl font-black uppercase tracking-tight leading-none">{isEditing ? 'Edit Villa' : 'Add New Villa'}</h3>
+                    <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5 md:mt-1 leading-none">{isEditing ? 'Update villa details and pricing' : 'Register and configure villa'}</p>
                   </div>
                </div>
-              <button onClick={() => setShowAddRoom(false)} className="p-2 hover:bg-white rounded-xl border border-transparent hover:border-slate-100 transition-all shadow-sm"><X className="w-5 h-5 text-slate-400" /></button>
+              <button onClick={() => { setShowAddVilla(false); setIsEditing(false); }} className="p-2 hover:bg-white rounded-xl border border-transparent hover:border-slate-100 transition-all shadow-sm"><X className="w-5 h-5 text-slate-400" /></button>
             </div>
-            <form 
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!newRoomData.name.trim()) return;
-                addRoom({
-                  name: newRoomData.name,
-                  type: newRoomData.type,
-                  capacity: parseInt(newRoomData.capacity),
-                  status: newRoomData.status,
-                  price: newRoomData.type === 'Suite' ? 12000 : newRoomData.type === 'Deluxe' ? 4500 : 2500,
-                  assignedGuest: null,
-                  notes: newRoomData.notes
-                });
-                setNewRoomData({ name: '', type: 'Deluxe', capacity: 2, status: 'Available', notes: '' });
-                setShowAddRoom(false);
-              }} 
-              className="flex-1 overflow-y-auto scrollbar-hide"
-            >
-              <div className="p-6 md:p-8 space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Room Name</label>
-                    <input 
-                      required
-                      value={newRoomData.name}
-                      onChange={(e) => setNewRoomData({...newRoomData, name: e.target.value})}
-                      placeholder="e.g. LENA"
-                      className="w-full px-5 py-3.5 bg-slate-50 rounded-2xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary/20 focus:bg-white transition-all"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Type</label>
-                    <div className="relative">
-                      <select 
-                        value={newRoomData.type}
-                        onChange={(e) => setNewRoomData({...newRoomData, type: e.target.value})}
-                        className="w-full px-5 py-3.5 bg-slate-50 rounded-2xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary/20 focus:bg-white transition-all appearance-none"
-                      >
-                        {roomTypes.map(t => <option key={t}>{t}</option>)}
-                      </select>
-                      <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 rotate-90 pointer-events-none" />
-                    </div>
-                  </div>
+            <form onSubmit={handleCreateOrUpdate} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 md:p-8 space-y-5 md:space-y-6 overflow-y-auto scrollbar-hide">
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Villa Name / Number *</label>
+                  <input 
+                    required
+                    type="text"
+                    value={formData.name}
+                    onChange={e => setFormData({...formData, name: e.target.value})}
+                    placeholder="e.g. VILLA-101"
+                    className="w-full px-4 py-3 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-bold transition-all"
+                  />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Capacity</label>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Type</label>
+                    <select 
+                      value={formData.type}
+                      onChange={e => setFormData({...formData, type: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold appearance-none"
+                    >
+                      {villaTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Capacity</label>
                     <input 
                       type="number"
                       min="1"
-                      max="10"
-                      value={newRoomData.capacity}
-                      onChange={(e) => setNewRoomData({...newRoomData, capacity: e.target.value})}
-                      className="w-full px-5 py-3.5 bg-slate-50 rounded-2xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary/20 focus:bg-white transition-all"
+                      value={formData.capacity}
+                      onChange={e => setFormData({...formData, capacity: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Initial Status</label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Status</label>
+                    <select 
+                      value={formData.status}
+                      onChange={e => setFormData({...formData, status: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold appearance-none"
+                    >
+                      {villaStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Price per night</label>
                     <div className="relative">
-                      <select 
-                        value={newRoomData.status}
-                        onChange={(e) => setNewRoomData({...newRoomData, status: e.target.value})}
-                        className="w-full px-5 py-3.5 bg-slate-50 rounded-2xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary/20 focus:bg-white transition-all appearance-none"
-                      >
-                        {roomStatuses.map(s => <option key={s}>{s}</option>)}
-                      </select>
-                      <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 rotate-90 pointer-events-none" />
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
+                      <input 
+                        type="number"
+                        min="0"
+                        value={formData.price}
+                        onChange={e => setFormData({...formData, price: e.target.value})}
+                        className="w-full pl-8 pr-4 py-3 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold"
+                      />
                     </div>
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Notes</label>
+
+                <div>
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Special Notes</label>
                   <textarea 
-                    value={newRoomData.notes}
-                    onChange={(e) => setNewRoomData({...newRoomData, notes: e.target.value})}
-                    className="w-full px-5 py-3.5 bg-slate-50 rounded-2xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary/20 focus:bg-white h-24 resize-none transition-all"
-                    placeholder="Additional space configuration details..."
+                    value={formData.notes}
+                    onChange={e => setFormData({...formData, notes: e.target.value})}
+                    placeholder="e.g. Requires deep cleaning, private pool access..."
+                    className="w-full px-4 py-3 bg-slate-50/50 border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold resize-none h-24"
                   />
                 </div>
               </div>
-              <div className="p-6 md:p-8 border-t border-slate-50 bg-white shrink-0 relative z-20">
-                <button type="submit" className="w-full btn-primary py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-primary/20 active:scale-95 transition-all">
-                  Register Unit
+              <div className="p-6 md:p-8 bg-slate-50 shrink-0">
+                <button type="submit" className="w-full btn-primary h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-xl shadow-primary/20">
+                  {isEditing ? 'Save Changes' : 'Create Villa'}
                 </button>
               </div>
             </form>
@@ -273,129 +394,8 @@ const Rooms = () => {
         </div>,
         document.body
       )}
-
-      {selectedRoom && createPortal(
-        <div className="fixed inset-0 z-[999] flex items-center justify-center p-0 sm:p-4">
-          <div onClick={() => setSelectedRoom(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
-          <div className="relative w-full max-w-[95%] md:max-w-lg bg-white rounded-t-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] self-end sm:self-center animate-in fade-in slide-in-from-bottom-4 sm:zoom-in duration-300">
-            <div className="p-5 md:p-8 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-4">
-                <div className={cn("w-12 md:w-14 h-12 md:h-14 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-inner", getStatusConfig(selectedRoom.status).color)}>
-                  <Bed className="w-6 md:w-7 h-6 md:h-7" />
-                </div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-black text-text-primary uppercase tracking-tight leading-none">{selectedRoom.name}</h3>
-                  <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5 md:mt-1">{selectedRoom.id}</p>
-                </div>
-              </div>
-              <button onClick={() => setSelectedRoom(null)} className="p-2.5 hover:bg-white rounded-xl border border-transparent hover:border-slate-100 transition-all shadow-sm"><X className="w-5 h-5 text-slate-400" /></button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto scrollbar-hide px-6 py-8 md:px-8 md:py-10 space-y-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2.5">Guest Assignment</p>
-                  <div className="flex items-center gap-3">
-                    <p className="text-base font-black text-text-primary">{selectedRoom.assignedGuest || 'No Guest Active'}</p>
-                    {selectedRoom.assignedGuest && (
-                      <button 
-                        onClick={() => {
-                          updateRoom(selectedRoom.id, { assignedGuest: null, status: 'Cleaning' });
-                          setSelectedRoom(null);
-                        }}
-                        className="p-1.5 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-white transition-all shadow-sm"
-                        title="Unassign Guest"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div className="sm:text-right">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2.5">Room State</p>
-                  <div className="flex sm:justify-end">
-                    <div className="relative min-w-[140px]">
-                      <select 
-                        value={selectedRoom.status}
-                        onChange={(e) => {
-                          updateRoom(selectedRoom.id, { status: e.target.value });
-                          setSelectedRoom({...selectedRoom, status: e.target.value});
-                        }}
-                        className={cn("w-full px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 outline-none transition-all appearance-none", getStatusConfig(selectedRoom.status).border, getStatusConfig(selectedRoom.status).text)}
-                      >
-                        {roomStatuses.map(s => <option key={s}>{s}</option>)}
-                      </select>
-                      <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rotate-90 pointer-events-none opacity-50" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {!selectedRoom.assignedGuest && (
-                <div className="space-y-3">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Direct Assignment</label>
-                  <div className="flex gap-2">
-                    <input 
-                      id="assign-guest-input"
-                      placeholder="Enter guest name for onboarding..."
-                      className="flex-1 px-5 py-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none border-2 border-transparent focus:border-primary/20 focus:bg-white transition-all shadow-inner"
-                    />
-                    <button 
-                      onClick={() => {
-                        const input = document.getElementById('assign-guest-input');
-                        if (input.value.trim()) {
-                          updateRoom(selectedRoom.id, { assignedGuest: input.value.trim(), status: 'Occupied' });
-                          setSelectedRoom(null);
-                        }
-                      }}
-                      className="px-6 bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-[9px] shadow-xl shadow-primary/20 active:scale-95 transition-all"
-                    >
-                      Assign
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              <div className="p-6 bg-slate-50 rounded-[2.5rem] border border-slate-100/50 space-y-4">
-                <div className="flex justify-between items-center">
-                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Configuration Profile</p>
-                   <span className="px-3 py-1 bg-white rounded-lg text-[9px] font-black uppercase tracking-widest text-primary border border-slate-100 shadow-sm">{selectedRoom.type}</span>
-                </div>
-                <textarea 
-                  className="w-full bg-transparent text-xs font-medium text-text-secondary leading-relaxed border-none outline-none resize-none h-20 scrollbar-hide"
-                  defaultValue={selectedRoom.notes}
-                  onBlur={(e) => updateRoom(selectedRoom.id, { notes: e.target.value })}
-                  placeholder="No specific intelligence notes for this unit."
-                />
-              </div>
-            </div>
-            
-            <div className="p-6 md:p-8 border-t border-slate-50 flex flex-col sm:flex-row gap-4 bg-white shrink-0 relative z-20">
-              <button 
-                onClick={() => setSelectedRoom(null)}
-                className="flex-1 py-4 bg-slate-50 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-100 transition-all active:scale-95"
-              >
-                Close Details
-              </button>
-              <button 
-                onClick={() => {
-                  if (confirm('Delete this unit? This action cannot be undone.')) {
-                    deleteRoom(selectedRoom.id);
-                    setSelectedRoom(null);
-                  }
-                }}
-                className="w-full sm:w-14 h-14 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all active:scale-95 shadow-sm"
-              >
-                <Trash2 className="w-5 h-5 md:w-6 md:h-6" />
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
     </div>
   );
 };
 
-export default Rooms;
+export default Villas;

@@ -65,6 +65,8 @@ import Rooms from './pages/dashboard/reception/Rooms';
 import Reservations from './pages/dashboard/reception/Reservations';
 import GuestFolio from './pages/dashboard/reception/GuestFolio';
 import GuestBills from './pages/dashboard/reception/GuestBills';
+import Guests from './pages/dashboard/reception/Guests';
+import AdminCalendar from './pages/dashboard/reception/AdminCalendar';
 import Concierge from './pages/dashboard/reception/Concierge';
 
 
@@ -172,6 +174,8 @@ function App() {
                       <Route path="/reports" element={<ModuleRedirect module="reports" />} />
                       <Route path="/rooms" element={<ModuleRedirect module="rooms" />} />
                       <Route path="/reservations" element={<ModuleRedirect module="reservations" />} />
+                      <Route path="/calendar" element={<ModuleRedirect module="calendar" />} />
+                      <Route path="/guests" element={<ModuleRedirect module="guests" />} />
                       <Route path="/folio" element={<ModuleRedirect module="folio" />} />
                       <Route path="/guest-bills" element={<ModuleRedirect module="guest-bills" />} />
                       <Route path="/settlements" element={<ModuleRedirect module="settlements" />} />
@@ -253,6 +257,18 @@ function App() {
                       <Route path="/:role/reservations" element={
                         <ProtectedRoute allowedRoles={[roles.ADMIN, roles.MANAGER, roles.WAITER]}>
                           <MainLayout><Reservations /></MainLayout>
+                        </ProtectedRoute>
+                      } />
+
+                      <Route path="/:role/calendar" element={
+                        <ProtectedRoute allowedRoles={[roles.ADMIN, roles.MANAGER]}>
+                          <MainLayout><AdminCalendar /></MainLayout>
+                        </ProtectedRoute>
+                      } />
+
+                      <Route path="/:role/guests" element={
+                        <ProtectedRoute allowedRoles={[roles.ADMIN, roles.MANAGER]}>
+                          <MainLayout><Guests /></MainLayout>
                         </ProtectedRoute>
                       } />
 

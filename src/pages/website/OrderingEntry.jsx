@@ -32,7 +32,7 @@ const OrderingEntry = () => {
           transition={{ delay: 0.1 }}
           className="text-2xl md:text-3xl font-black text-[#2a2a2a] mb-3"
         >
-          Welcome to Gila House
+          Welcome to LUMIÈRE VILLAS
         </motion.h1>
 
         {/* Error Message - Red */}

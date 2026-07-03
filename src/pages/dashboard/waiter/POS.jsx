@@ -737,7 +737,7 @@ const POS = () => {
       {orderForReceipt && (
         <div id="printable-area" className="hidden print:block printable-area receipt-print active-print">
           <div className="text-center space-y-1 mb-4">
-            <h1 className="text-2xl font-black uppercase tracking-tight">Gila House</h1>
+            <h1 className="text-2xl font-black uppercase tracking-tight">LUMIÈRE VILLAS</h1>
             <p className="text-[10px] font-bold">Main Branch</p>
             <p className="text-[10px] font-bold">GST: 22AAAAA0000A1Z5</p>
             <p className="text-[10px] font-bold">Ph: +91 12345 67890</p>
@@ -821,7 +821,7 @@ const POS = () => {
           <div className="text-center pt-12 space-y-2">
             <p className="text-sm font-black uppercase tracking-[0.2em]">*** THANK YOU ***</p>
             <p className="text-[10px] font-bold uppercase tracking-widest">Visit Again!</p>
-            <p className="text-[8px] font-black text-slate-400 mt-8 uppercase tracking-tighter">Powered by Gila House POS</p>
+            <p className="text-[8px] font-black text-slate-400 mt-8 uppercase tracking-tighter">Powered by LUMIÈRE VILLAS POS</p>
           </div>
         </div>
       )}

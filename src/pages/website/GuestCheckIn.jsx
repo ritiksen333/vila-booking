@@ -24,7 +24,7 @@ const GuestCheckIn = () => {
           transition={{ delay: 0.1 }}
           className="mb-8"
         >
-          <h1 className="text-3xl md:text-5xl font-black text-[#2a2a2a] mb-2 tracking-tight">Gila House</h1>
+          <h1 className="text-3xl md:text-5xl font-black text-[#2a2a2a] mb-2 tracking-tight">LUMIÈRE VILLAS</h1>
           <p className="text-[10px] md:text-sm font-bold text-teal-700/60 uppercase tracking-widest">Hotel Guest Check-in</p>
         </motion.div>
 
@@ -88,7 +88,7 @@ const GuestCheckIn = () => {
           className="mt-8 md:mt-12 space-y-3 flex flex-col items-center"
         >
           <Link to="/" className="text-[11px] md:text-xs font-bold text-teal-700/40 hover:text-teal-700 transition-colors flex items-center gap-1">
-            <ArrowLeft size={12} /> Back to Gila House
+            <ArrowLeft size={12} /> Back to LUMIÈRE VILLAS
           </Link>
           <Link to="/login" className="text-[11px] md:text-xs font-bold text-teal-700/40 hover:text-teal-700 transition-colors">
             Staff? <span className="underline underline-offset-4">Sign in here</span>

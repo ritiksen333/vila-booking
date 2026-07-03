@@ -79,38 +79,18 @@ const MainLayout = ({ children }) => {
   };
 
   const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: getRoleModulePath('dashboard'), roles: [roles.ADMIN, roles.MANAGER, roles.CHEF, roles.WAITER, roles.CASHIER] },
-    { name: 'Tables', icon: Table2, path: getRoleModulePath('tables'), roles: [roles.ADMIN, roles.MANAGER, roles.WAITER] },
-    { name: 'POS', icon: Calculator, path: getRoleModulePath('pos'), roles: [roles.ADMIN, roles.MANAGER, roles.WAITER, roles.CASHIER] },
-    { name: 'Orders', icon: ClipboardList, path: getRoleModulePath('orders'), roles: [roles.ADMIN, roles.MANAGER, roles.WAITER, roles.CHEF, roles.CASHIER] },
-    { name: 'Kitchen', icon: CookingPot, path: getRoleModulePath('kitchen'), roles: [roles.ADMIN, roles.MANAGER, roles.CHEF] },
-    { name: 'Tasks', icon: ClipboardCheck, path: getRoleModulePath('tasks'), roles: [roles.ADMIN, roles.MANAGER, roles.WAITER, roles.CHEF] },
-    { name: 'Inventory', icon: Package, path: getRoleModulePath('inventory'), roles: [roles.ADMIN, roles.MANAGER, roles.CHEF] },
-    { name: 'Notifications', icon: Bell, path: getRoleModulePath('notifications'), roles: [roles.CHEF] },
-    { name: 'Menu', icon: UtensilsCrossed, path: getRoleModulePath('menu'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Staff', icon: Users, path: getRoleModulePath('staff'), roles: [roles.ADMIN] },
+    { name: 'Dashboard', icon: LayoutDashboard, path: getRoleModulePath('dashboard'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: 'Villas', icon: Bed, path: getRoleModulePath('rooms'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: 'Reservations', icon: CalendarCheck, path: getRoleModulePath('reservations'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: 'Calendar', icon: CalendarCheck, path: getRoleModulePath('calendar'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: 'Guests', icon: Users, path: getRoleModulePath('guests'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: 'Billing', icon: Receipt, path: getRoleModulePath('folio'), roles: [roles.ADMIN, roles.MANAGER] },
     { name: 'Reports', icon: BarChart3, path: getRoleModulePath('reports'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Rooms', icon: Bed, path: getRoleModulePath('rooms'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Reservations', icon: CalendarCheck, path: getRoleModulePath('reservations'), roles: [roles.ADMIN, roles.MANAGER, roles.WAITER] },
-    { name: 'Concierge', icon: MessageSquare, path: getRoleModulePath('concierge'), roles: [roles.ADMIN, roles.MANAGER, roles.WAITER] },
-
-    { name: 'Services', icon: Compass, path: getRoleModulePath('services'), roles: [roles.ADMIN, roles.MANAGER, roles.WAITER] },
-    { name: 'QR Manager', icon: QrCode, path: getRoleModulePath('qr-manager'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Guest Billing', icon: Receipt, path: getRoleModulePath('folio'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Guest Bills', icon: Receipt, path: getRoleModulePath('guest-bills'), roles: [roles.CASHIER] },
-    { name: 'Settlements', icon: CreditCard, path: getRoleModulePath('settlements'), roles: [roles.CASHIER] },
-    { name: 'Transactions', icon: History, path: getRoleModulePath('transactions'), roles: [roles.CASHIER] },
     { name: 'Settings', icon: Settings, path: getRoleModulePath('settings'), roles: [roles.ADMIN] },
     
-    // Customer Specific Items
+    // Customer Specific Items (Keeping these intact just in case customer portal is used)
     { name: 'Home', icon: Home, path: '/customer/home', roles: [roles.CUSTOMER] },
-    { name: 'Order Now', icon: UtensilsCrossed, path: '/customer/order-now', roles: [roles.CUSTOMER] },
-    { name: 'Orders', icon: History, path: '/customer/orders', roles: [roles.CUSTOMER] },
     { name: 'Reservations', icon: CalendarCheck, path: '/customer/reservations', roles: [roles.CUSTOMER] },
-    { name: 'Excursions', icon: Compass, path: '/customer/services', roles: [roles.CUSTOMER] },
-    { name: 'Favorites', icon: Heart, path: '/customer/favorites', roles: [roles.CUSTOMER] },
-    { name: 'Cart', icon: ShoppingCart, path: '/customer/cart', roles: [roles.CUSTOMER] },
-    { name: 'Profile', icon: UserIcon, path: '/customer/profile', roles: [roles.CUSTOMER] },
     { name: 'Support', icon: HelpCircle, path: '/customer/support', roles: [roles.CUSTOMER] },
   ];
 
@@ -140,7 +120,7 @@ const MainLayout = ({ children }) => {
               <span 
                 className="text-base font-black tracking-tight text-text-primary whitespace-nowrap uppercase italic"
               >
-                Gila<span className="text-primary">House</span>
+                LUMIÈRE <span className="text-primary">VILLAS</span>
               </span>
             )}
           </div>

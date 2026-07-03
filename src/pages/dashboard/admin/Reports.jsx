@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -9,26 +9,19 @@ import {
   ArrowRight, 
   DollarSign, 
   Users, 
-  ShoppingBag, 
+  Home, 
   Target, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  MoreHorizontal,
   ChevronRight,
-  Plus,
   RefreshCw,
   Printer,
   X,
   Search,
-  Filter,
   CheckCircle2,
-  AlertCircle,
-  Clock,
-  Zap,
-  Star
+  AlertCircle
 } from 'lucide-react';
 import { cn } from "../../../utils/cn";
 import printContent from "../../../utils/printUtil";
+import { useHospitality } from "../../../context/HospitalityContext";
 
 const Reports = () => {
   const [timeRange, setTimeRange] = useState('This Month');
@@ -36,13 +29,12 @@ const Reports = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState('Just now');
-  const [selectedMetric, setSelectedMetric] = useState(null);
   const [showDateModal, setShowDateModal] = useState(false);
-  const [showHeatmap, setShowHeatmap] = useState(false);
 
   const [toast, setToast] = useState(null);
 
-  // Mock Data Logic
+  const { rooms: villas, reservations, folios } = useHospitality();
+
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -58,11 +50,11 @@ const Reports = () => {
   };
 
   const handleExport = () => {
-    const csvContent = "data:text/csv;charset=utf-8,Date,Revenue,Orders,Guests\n2024-05-01,45000,120,340\n2024-05-02,52000,145,410";
+    const csvContent = "data:text/csv;charset=utf-8,Date,Revenue,Bookings,Guests\n2024-05-01,45000,12,34\n2024-05-02,52000,14,41";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `restaurant-report-${timeRange.toLowerCase().replace(' ', '-')}.csv`);
+    link.setAttribute("download", `villa-report-${timeRange.toLowerCase().replace(' ', '-')}.csv`);
     document.body.appendChild(link);
     link.click();
     showToast('CSV Report Downloaded');
@@ -73,596 +65,213 @@ const Reports = () => {
     showToast('Print command sent');
   };
 
+  // Real-time calculations
+  const totalRevenue = folios.reduce((acc, f) => acc + (f.total || 0), 0);
+  const totalGuests = reservations.reduce((acc, r) => acc + (parseInt(r.guests) || 0), 0);
+  const occupiedVillas = villas.filter(v => v.status === 'Occupied' || v.status === 'Checked In').length;
+  const occupancyRate = villas.length > 0 ? Math.round((occupiedVillas / villas.length) * 100) : 0;
+  const netProfit = totalRevenue * 0.75; // Mock profit margin of 75%
+
   const stats = [
-    { id: 'revenue', label: 'Total Revenue', value: '₹12,45,230', trend: '+14.2%', up: true, icon: DollarSign, color: 'primary', description: 'Total gross income from all channels.' },
-    { id: 'aov', label: 'Avg Order Value', value: '₹480', trend: '+8.5%', up: true, icon: ShoppingBag, color: 'orange', description: 'Average spending per ticket.' },
-    { id: 'guests', label: 'Total Guests', value: '2,840', trend: '-2.4%', up: false, icon: Users, color: 'purple', description: 'Total footfall across all shifts.' },
-    { id: 'profit', label: 'Net Profit', value: '₹3,12,000', trend: '+12.1%', up: true, icon: Target, color: 'success', description: 'Earnings after all operational costs.' },
+    { id: 'revenue', label: 'Total Revenue', value: `₹${totalRevenue.toLocaleString()}`, trend: '+14.2%', up: true, icon: DollarSign, color: 'primary', description: 'Total gross income from bookings.' },
+    { id: 'occupancy', label: 'Occupancy Rate', value: `${occupancyRate}%`, trend: '+5.5%', up: true, icon: Home, color: 'orange', description: 'Current percentage of villas booked.' },
+    { id: 'guests', label: 'Total Guests', value: totalGuests.toLocaleString(), trend: '+2.4%', up: true, icon: Users, color: 'purple', description: 'Total number of guests hosted.' },
+    { id: 'profit', label: 'Net Profit', value: `₹${netProfit.toLocaleString()}`, trend: '+12.1%', up: true, icon: Target, color: 'success', description: 'Earnings after operating costs.' },
   ];
 
-  const performanceData = [
-    { name: 'Rahul Sharma', role: 'Waiter', orders: 145, revenue: '₹42,500', rating: 4.8 },
-    { name: 'Priya Singh', role: 'Chef', orders: 280, revenue: '₹1,24,000', rating: 4.9 },
-    { name: 'Margherita Pizza', role: 'Top Dish', orders: 420, revenue: '₹1,25,580', rating: 4.7 },
-    { name: 'Cheese Burger', role: 'Top Dish', orders: 310, revenue: '₹58,590', rating: 4.5 },
-    { name: 'Alexander Wright', role: 'Guest', orders: 12, revenue: '₹45,000', rating: 5.0 },
-    { name: 'Vikram Das', role: 'Waiter', orders: 132, revenue: '₹38,200', rating: 4.6 },
-    { name: 'Butter Chicken', role: 'Top Dish', orders: 215, revenue: '₹96,535', rating: 4.9 },
-    { name: 'Sneha Patel', role: 'Manager', orders: 450, revenue: '₹4,50,000', rating: 5.0 },
-  ];
+  const performanceData = villas.map(villa => {
+    const villaReservations = reservations.filter(r => r.targetId === villa.name);
+    const villaFolios = folios.filter(f => f.roomName === villa.name);
+    const villaRevenue = villaFolios.reduce((acc, f) => acc + (f.total || 0), 0);
+    
+    return {
+      name: villa.name,
+      type: villa.type,
+      bookings: villaReservations.length,
+      revenueValue: villaRevenue,
+      revenue: `₹${villaRevenue.toLocaleString()}`
+    };
+  }).sort((a, b) => b.revenueValue - a.revenueValue);
 
   const filteredPerformance = performanceData.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    item.role.toLowerCase().includes(searchQuery.toLowerCase())
+    item.type.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="space-y-6 h-full flex flex-col overflow-hidden relative">
-      {/* Toast Feedback */}
+      {/* Toast Notification */}
       {toast && (
-        <div 
-          className={cn(
-            "fixed top-6 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 font-black text-[10px] uppercase tracking-widest border",
-            toast.type === 'success' ? "bg-primary border-primary/20 text-white" : "bg-primary border-primary/20 text-white"
-          )}
-        >
-          {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4 text-white" /> : <AlertCircle className="w-4 h-4 text-white" />}
-          {toast.message}
+        <div className="absolute top-4 right-4 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
+          <div className={cn(
+            "px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 border",
+            toast.type === 'success' ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-slate-800 text-white border-slate-700"
+          )}>
+            <CheckCircle2 className="w-5 h-5" />
+            <span className="font-bold text-sm tracking-wide">{toast.message}</span>
+          </div>
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 shrink-0 print:hidden px-1">
-        <div className="space-y-1">
-          <h2 className="text-2xl lg:text-3xl font-black text-text-primary uppercase tracking-tight leading-none">Intelligence</h2>
-          <p className="text-text-secondary text-[9px] lg:text-sm font-medium flex items-center gap-2">
-            Analytics Node • <span className="text-primary font-black uppercase tracking-widest text-[8px] lg:text-[10px]">Active {lastUpdated}</span>
-          </p>
+      {/* Header */}
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 shrink-0 px-2">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white shadow-xl shadow-primary/20">
+            <BarChart3 className="w-6 h-6 stroke-[2.5]" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black tracking-tight text-text-primary uppercase tracking-wider">Business Analytics</h2>
+            <p className="text-text-secondary text-sm font-bold mt-1 flex items-center gap-2">
+              Updated: {lastUpdated} 
+              <button onClick={handleRefresh} className={cn("text-primary hover:text-primary-dark transition-all", isRefreshing && "animate-spin")}><RefreshCw className="w-3.5 h-3.5" /></button>
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide -mx-1 px-1">
-          <div className="flex bg-white p-1 rounded-2xl border border-slate-100 shadow-sm shrink-0">
-            <button 
-              onClick={handleRefresh}
-              className="p-2.5 hover:bg-slate-50 rounded-xl transition-all active:scale-90"
-            >
-              <RefreshCw className={cn("w-4 h-4 text-text-secondary", isRefreshing && "animate-spin")} />
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="bg-white border border-slate-100 rounded-2xl p-1 flex items-center shadow-sm">
+            {['Today', 'This Week', 'This Month', 'Custom'].map((range) => (
+              <button
+                key={range}
+                onClick={() => {
+                  setTimeRange(range);
+                  if (range === 'Custom') setShowDateModal(true);
+                }}
+                className={cn(
+                  "px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                  timeRange === range ? "bg-primary text-white shadow-md shadow-primary/20" : "text-slate-500 hover:text-primary hover:bg-slate-50"
+                )}
+              >
+                {range}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button onClick={handlePrint} className="w-12 h-12 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary transition-all shadow-sm">
+              <Printer className="w-5 h-5" />
             </button>
-            <button 
-              onClick={handlePrint}
-              className="p-2.5 hover:bg-slate-50 rounded-xl transition-all active:scale-90"
-            >
-              <Printer className="w-4 h-4 text-text-secondary" />
+            <button onClick={handleExport} className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center hover:bg-primary-dark transition-all shadow-xl shadow-primary/20">
+              <Download className="w-5 h-5" />
             </button>
           </div>
-          <button 
-            onClick={() => setShowDateModal(true)}
-            className="flex items-center gap-2 px-4 py-3 bg-white border border-slate-100 rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-50 shadow-sm shrink-0 transition-all active:scale-95"
-          >
-            <Calendar className="w-4 h-4 text-primary" /> {timeRange}
-          </button>
-          <button 
-            onClick={handleExport}
-            className="btn-primary flex items-center gap-2 py-3 px-6 shadow-xl shadow-primary/20 text-[9px] font-black uppercase tracking-widest shrink-0"
-          >
-            <Download className="w-4 h-4" /> Export
-          </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto pb-20 lg:pb-8 pr-1 lg:pr-2 scrollbar-hide space-y-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+      <div id="printable-area" className="flex-1 overflow-y-auto scrollbar-hide px-2 pb-10 space-y-6">
+        {/* Top Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
           {stats.map((stat) => (
-            <div 
-              onClick={() => setSelectedMetric(stat)}
-              key={stat.label} 
-              className="card group hover:border-primary/20 overflow-hidden relative p-4 lg:p-6 rounded-[1.5rem] lg:rounded-[2rem] bg-white cursor-pointer border border-slate-100 shadow-sm active:scale-95 transition-all"
-            >
-              <div className="flex justify-between items-start mb-3 lg:mb-5">
-                <p className="text-text-secondary text-[8px] lg:text-xs font-black uppercase tracking-widest leading-none">{stat.label}</p>
-                <div className="text-primary opacity-60">
-                  <stat.icon className="w-4 h-4 lg:w-5 lg:h-5 stroke-[2]" />
-                </div>
-              </div>
-              <div className="flex items-end justify-between relative z-10 gap-2">
-                <h3 className="text-lg lg:text-3xl font-black text-text-primary tracking-tighter uppercase leading-none">{stat.value}</h3>
-                <span className={cn(
-                  "px-1.5 lg:px-2.5 py-0.5 lg:py-1 rounded-lg text-[7px] lg:text-[10px] font-black flex items-center gap-0.5 lg:gap-1 shrink-0",
-                  stat.up ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
+            <div key={stat.id} className="card bg-white border-none shadow-xl shadow-slate-100/50 p-6 rounded-[2.5rem] relative overflow-hidden group hover:shadow-2xl hover:shadow-slate-200/50 transition-all">
+              <div className="absolute -right-6 -top-6 w-32 h-32 bg-slate-50 rounded-full opacity-50 group-hover:scale-110 transition-transform duration-500" />
+              
+              <div className="flex justify-between items-start relative z-10">
+                <div className={cn(
+                  "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg",
+                  stat.color === 'primary' ? 'bg-indigo-50 text-indigo-600' :
+                  stat.color === 'orange' ? 'bg-orange-50 text-orange-600' :
+                  stat.color === 'purple' ? 'bg-purple-50 text-purple-600' :
+                  'bg-emerald-50 text-emerald-600'
                 )}>
-                  {stat.up ? <ArrowUpRight className="w-2.5 h-2.5 lg:w-3.5 lg:h-3.5" /> : <ArrowDownRight className="w-2.5 h-2.5 lg:w-3.5 lg:h-3.5" />}
+                  <stat.icon className="w-7 h-7 stroke-[2.5]" />
+                </div>
+                <span className={cn(
+                  "flex items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border",
+                  stat.up ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"
+                )}>
+                  {stat.up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                   {stat.trend}
                 </span>
               </div>
+
+              <div className="mt-8 relative z-10">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                <h3 className="text-3xl font-black text-text-primary tracking-tight">{stat.value}</h3>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          <div className="lg:col-span-2 card p-5 lg:p-8 min-h-[350px] lg:min-h-[450px] flex flex-col shadow-2xl border-none bg-white rounded-[2rem] lg:rounded-[3rem]">
-             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 lg:mb-8 gap-4">
-                <div>
-                   <div className="flex items-center gap-2 lg:gap-3 overflow-x-auto pb-1 scrollbar-hide">
-                      {['Revenue', 'Orders', 'Guests'].map(tab => (
-                        <button 
-                          key={tab}
-                          onClick={() => setActiveChartTab(tab)}
-                          className={cn(
-                            "px-3 lg:px-4 py-1.5 rounded-lg lg:rounded-xl text-[8px] lg:text-[9px] font-black uppercase tracking-widest whitespace-nowrap transition-all",
-                            activeChartTab === tab ? "bg-primary text-white shadow-lg shadow-primary/20" : "text-slate-400 hover:bg-slate-50"
-                          )}
-                        >
-                          {tab}
-                        </button>
-                      ))}
-                   </div>
-                   <p className="text-[8px] lg:text-[10px] font-black text-text-secondary mt-2 lg:mt-3 uppercase tracking-widest italic opacity-60 leading-none">Visualizing performance</p>
-                </div>
-                <div className="flex gap-4 lg:gap-6">
-                   <div className="flex items-center gap-1.5 lg:gap-2">
-                      <div className="w-2.5 h-2.5 lg:w-3 lg:h-3 rounded-full bg-primary shadow-sm shrink-0" />
-                      <span className="text-[7px] lg:text-[9px] font-black uppercase tracking-widest text-text-secondary whitespace-nowrap">Current</span>
-                   </div>
-                   <div className="flex items-center gap-1.5 lg:gap-2">
-                      <div className="w-2.5 h-2.5 lg:w-3 lg:h-3 rounded-full bg-slate-100 shrink-0" />
-                      <span className="text-[7px] lg:text-[9px] font-black uppercase tracking-widest text-text-secondary whitespace-nowrap">Benchmark</span>
-                   </div>
-                </div>
-             </div>
-             
-             <div className="flex-1 flex items-end gap-2 lg:gap-3 px-1 lg:px-4 pb-2 lg:pb-4 h-48 lg:h-64">
-                {[60, 45, 80, 55, 90, 70, 85, 40, 75, 65, 95, 80].map((h, i) => (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-2 lg:gap-3 group h-full justify-end">
-                     <div className="w-full relative h-full flex flex-col justify-end">
-                        <div 
-                          style={{ height: `${h}%` }}
-                          className="w-full bg-slate-50 rounded-lg lg:rounded-2xl group-hover:bg-slate-100"
-                        />
-                        <div 
-                          style={{ height: `${h * 0.7}%` }}
-                          className="absolute bottom-0 w-full bg-primary rounded-lg lg:rounded-2xl shadow-lg"
-                        />
-                     </div>
-                     <span className="text-[7px] lg:text-[10px] font-black text-slate-300 group-hover:text-text-primary uppercase tracking-widest">W{i+1}</span>
-                  </div>
-                ))}
-             </div>
-          </div>
-
-          <div className="card p-6 lg:p-8 min-h-[350px] lg:min-h-[450px] flex flex-col shadow-2xl border-none bg-white rounded-[2rem] lg:rounded-[3rem] relative overflow-hidden">
-             <div className="flex justify-between items-start mb-4 lg:mb-6">
-                <div>
-                   <h4 className="text-base lg:text-lg font-black text-text-primary uppercase tracking-tight">Category Split</h4>
-                   <p className="text-[8px] lg:text-[9px] font-black text-text-secondary uppercase tracking-widest mt-1">Top segments</p>
-                </div>
-                <div className="w-8 h-8 lg:w-10 lg:h-10 bg-orange-50 rounded-lg lg:rounded-xl flex items-center justify-center text-orange-500">
-                   <PieChart className="w-4 h-4 lg:w-5 lg:h-5" />
-                </div>
-             </div>
-             
-             <div className="flex-1 flex items-center justify-center relative my-2 lg:my-4">
-                <div className="w-36 h-36 lg:w-48 lg:h-48 rounded-full border-[12px] lg:border-[18px] border-slate-50 relative flex items-center justify-center shadow-inner">
-                   <div className="absolute inset-0 rounded-full border-[12px] lg:border-[18px] border-primary border-t-transparent border-r-transparent rotate-45" />
-                   <div className="absolute inset-0 rounded-full border-[12px] lg:border-[18px] border-orange-400 border-b-transparent border-l-transparent -rotate-12 opacity-80" />
-                   <div className="text-center bg-white w-20 h-20 lg:w-24 lg:h-24 rounded-full flex flex-col items-center justify-center shadow-xl">
-                      <p className="text-2xl lg:text-3xl font-black text-text-primary tracking-tighter">84%</p>
-                      <p className="text-[7px] lg:text-[8px] font-black text-text-secondary uppercase tracking-widest">Growth</p>
-                   </div>
-                </div>
-             </div>
-
-             <div className="space-y-3 lg:space-y-4 mt-4 lg:mt-6">
-                {[
-                   { name: 'Pizzas', val: '42%', color: 'bg-primary' },
-                   { name: 'Burgers', val: '28%', color: 'bg-orange-400' },
-                   { name: 'Drinks', val: '18%', color: 'bg-indigo-300' },
-                   { name: 'Desserts', val: '12%', color: 'bg-slate-200' },
-                ].map(item => (
-                  <div key={item.name} className="flex items-center justify-between group cursor-pointer">
-                     <div className="flex items-center gap-2 lg:gap-3">
-                        <div className={cn("w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-full shadow-sm", item.color)} />
-                        <span className="text-[8px] lg:text-[10px] font-black uppercase tracking-widest text-text-secondary group-hover:text-text-primary">{item.name}</span>
-                     </div>
-                     <span className="text-[10px] lg:text-xs font-black text-text-primary tracking-tight">{item.val}</span>
-                  </div>
-                ))}
-             </div>
-          </div>
-        </div>
-
-        <div className="card p-0 overflow-hidden shadow-2xl border-none bg-white rounded-[2rem] lg:rounded-[3rem]">
-           <div className="px-5 py-5 lg:px-8 lg:py-6 border-b border-slate-50 flex flex-col lg:flex-row justify-between lg:items-center gap-4 bg-slate-50/20">
+        {/* Charts & Tables Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          
+          {/* Main Chart Area */}
+          <div className="xl:col-span-2 card bg-white border-none shadow-xl shadow-slate-100/50 p-6 rounded-[2.5rem] flex flex-col h-[500px]">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
               <div>
-                <h4 className="text-lg lg:text-xl font-black text-text-primary uppercase tracking-tight leading-none">Intelligence Logs</h4>
-                <p className="text-[8px] lg:text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1.5 leading-none">Cross-sectional performance analysis</p>
+                <h3 className="text-lg font-black text-text-primary uppercase tracking-tight">Analytics Overview</h3>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Revenue vs Occupancy</p>
               </div>
-              <div className="relative group w-full lg:w-72">
-                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-primary" />
-                 <input 
-                  type="text" 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search logs..." 
-                  className="w-full pl-10 pr-4 py-2.5 lg:py-3 bg-white border border-slate-100 rounded-xl lg:rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none shadow-sm text-[9px] lg:text-[10px] font-bold uppercase tracking-widest"
-                 />
-              </div>
-           </div>
-           
-           <div className="hidden lg:block overflow-x-auto scrollbar-hide">
-              <table className="w-full min-w-[700px]">
-                <thead>
-                  <tr className="text-left text-slate-400 text-[9px] font-black uppercase tracking-[0.2em] bg-slate-50/50">
-                    <th className="px-10 py-5">Domain</th>
-                    <th className="px-10 py-5">Role</th>
-                    <th className="px-10 py-5">Units</th>
-                    <th className="px-10 py-5">Yield</th>
-                    <th className="px-10 py-5 text-right">Service</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {filteredPerformance.length > 0 ? filteredPerformance.map((row, idx) => (
-                    <tr 
-                      key={idx} 
-                      className="text-xs font-bold hover:bg-slate-50/50 group cursor-pointer active:bg-slate-50 transition-colors"
-                    >
-                      <td className="px-10 py-5">
-                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-primary text-white rounded-xl flex items-center justify-center text-xs font-black shadow-lg shadow-primary/20 shrink-0">
-                               {row.name.split(' ').map(n => n[0]).join('')}
-                            </div>
-                            <span className="text-text-primary text-sm font-black tracking-tight truncate max-w-[150px]">{row.name}</span>
-                         </div>
-                      </td>
-                      <td className="px-10 py-5">
-                         <span className="badge bg-indigo-50 text-primary border-none text-[8px] uppercase tracking-widest">{row.role}</span>
-                      </td>
-                      <td className="px-10 py-5 text-text-primary font-black">{row.orders}</td>
-                      <td className="px-10 py-5 text-primary font-black">{row.revenue}</td>
-                      <td className="px-10 py-5 text-right">
-                         <div className="flex items-center justify-end gap-1 text-yellow-600 font-black">
-                            <Star className="w-3.5 h-3.5 fill-current" /> {row.rating}
-                         </div>
-                      </td>
-                    </tr>
-                  )) : (
-                    <tr>
-                      <td colSpan="5" className="py-20 text-center">
-                         <div className="flex flex-col items-center">
-                            <AlertCircle className="w-10 h-10 text-slate-200 mb-4" />
-                            <h5 className="text-lg font-black text-text-primary uppercase">No records found</h5>
-                         </div>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-           </div>
-
-           {/* Mobile Log View */}
-           <div className="lg:hidden p-4 space-y-3">
-              {filteredPerformance.length > 0 ? filteredPerformance.map((row, idx) => (
-                <div key={idx} className="p-4 bg-slate-50 rounded-2xl flex items-center justify-between group active:scale-[0.98] transition-all">
-                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-[10px] font-black text-primary shadow-sm border border-slate-100">
-                         {row.name.split(' ').map(n => n[0]).join('')}
-                      </div>
-                      <div>
-                         <p className="text-xs font-black text-text-primary uppercase tracking-tight">{row.name}</p>
-                         <p className="text-[8px] font-black text-primary uppercase tracking-widest mt-0.5">{row.role}</p>
-                      </div>
-                   </div>
-                   <div className="text-right">
-                      <p className="text-xs font-black text-text-primary">{row.revenue}</p>
-                      <div className="flex items-center justify-end gap-1 text-yellow-600 text-[9px] font-black mt-0.5">
-                         <Star className="w-2.5 h-2.5 fill-current" /> {row.rating}
-                      </div>
-                   </div>
-                </div>
-              )) : (
-                 <div className="py-12 text-center">
-                   <AlertCircle className="w-8 h-8 text-slate-200 mx-auto mb-3" />
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No intelligence records</p>
-                 </div>
-              )}
-           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 pb-10">
-           <div className="card !bg-primary text-white p-6 lg:p-10 overflow-hidden relative group rounded-[2rem] lg:rounded-[3rem] shadow-2xl shadow-primary/20 active:scale-[0.98] transition-all border-none">
-              <div className="relative z-10">
-                <h5 className="text-lg lg:text-xl font-black mb-1 uppercase tracking-tight">Revenue Pulse</h5>
-                <p className="text-white/60 text-[7px] lg:text-[9px] font-black uppercase tracking-widest mb-6 lg:mb-10 leading-none">Target: ₹15.0L</p>
-                <div className="flex items-end justify-between mb-4">
-                   <div className="flex flex-col">
-                      <span className="text-[7px] lg:text-[9px] font-black text-white/60 uppercase tracking-widest mb-1 leading-none">Velocity</span>
-                      <span className="text-3xl lg:text-5xl font-black text-white tracking-tighter leading-none">82<span className="text-sm lg:text-lg ml-0.5">%</span></span>
-                   </div>
-                   <div className="flex flex-col items-end">
-                      <span className="text-[7px] lg:text-[9px] font-black text-white/60 uppercase tracking-widest mb-1.5 leading-none">Gap</span>
-                      <span className="text-base lg:text-xl font-black text-white/80 leading-none">₹2.7L</span>
-                   </div>
-                </div>
-                <div className="h-3 lg:h-4 bg-white/20 rounded-full overflow-hidden mb-2 shadow-inner">
-                   <div 
-                     style={{ width: '82%' }}
-                     className="h-full bg-white shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all duration-1000"
-                   />
-                </div>
-              </div>
-              <Target className="absolute -bottom-8 lg:-bottom-10 -right-8 lg:-right-10 w-32 lg:w-44 h-32 lg:h-44 text-white opacity-10" />
-           </div>
-
-           <div 
-             onClick={() => setShowHeatmap(true)}
-             className="card p-6 lg:p-10 bg-indigo-50 border-primary/10 flex flex-col justify-center rounded-[2rem] lg:rounded-[3rem] shadow-xl group hover:bg-white cursor-pointer active:scale-[0.98] transition-all"
-           >
-              <div className="w-10 h-10 lg:w-14 lg:h-14 bg-white rounded-xl lg:rounded-2xl flex items-center justify-center mb-4 lg:mb-6 shadow-md">
-                 <TrendingUp className="w-6 h-6 lg:w-8 lg:h-8 text-primary" />
-              </div>
-              <h5 className="text-lg lg:text-xl font-black text-text-primary mb-1 lg:mb-1 uppercase tracking-tight">Peak Pulse</h5>
-              <p className="text-[10px] lg:text-xs font-bold text-text-secondary mb-4 lg:mb-6 leading-relaxed">
-                 Max throughput at <span className="text-primary font-black">7:30 PM</span>.
-              </p>
-              <button className="text-[8px] lg:text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-1.5 leading-none">
-                 Analyze Traffic <ChevronRight className="w-4 h-4" />
-              </button>
-           </div>
-
-
-        </div>
-      </div>
-
-      {/* Detail Drawer */}
-      {selectedMetric && (
-        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 lg:p-6">
-          <div onClick={() => setSelectedMetric(null)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-[200]" />
-          <div 
-            className="relative w-full max-w-[95%] md:max-w-[520px] max-h-[90vh] bg-white shadow-2xl z-[201] flex flex-col rounded-[2rem] md:rounded-[2.5rem] overflow-hidden self-center"
-          >
-             <div className="px-5 py-4 md:px-6 md:py-5 border-b border-slate-50 flex justify-between items-center bg-slate-50/30 shrink-0">
-                <div className="flex items-center gap-3 lg:gap-4">
-                  <div className={cn("p-3 lg:p-4 rounded-xl lg:rounded-2xl text-white shadow-xl shrink-0", selectedMetric.color === 'primary' ? 'bg-primary' : 'bg-orange-500')}>
-                     <selectedMetric.icon className="w-5 lg:w-6 h-5 lg:h-6" />
-                  </div>
-                  <div>
-                     <h3 className="text-lg lg:text-2xl font-black uppercase tracking-tight leading-none">{selectedMetric.label}</h3>
-                     <p className="text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5 lg:mt-1 leading-none">Deep Dive Analysis</p>
-                  </div>
-                </div>
-                <button onClick={() => setSelectedMetric(null)} className="p-2 lg:p-3 hover:bg-white rounded-xl lg:rounded-2xl shadow-sm border border-transparent hover:border-slate-100"><X className="w-6 lg:w-7 h-6 lg:h-7 text-slate-400" /></button>
-             </div>
-
-             <div className="flex-1 overflow-y-auto px-5 py-6 lg:px-6 lg:py-8 space-y-8 lg:space-y-10 scrollbar-hide">
-                <div className="p-5 lg:p-6 bg-slate-50 rounded-[2rem] lg:rounded-[3rem] border border-slate-100 relative overflow-hidden">
-                   <p className="text-[8px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 lg:mb-4">Definition</p>
-                   <p className="text-xs lg:text-sm font-bold text-text-secondary leading-relaxed italic">"{selectedMetric.description}"</p>
-                   <Zap className="absolute -bottom-8 lg:-bottom-10 -right-8 lg:-right-10 w-32 lg:w-40 h-32 lg:h-40 text-primary opacity-5" />
-                </div>
-
-                <div className="space-y-4 lg:space-y-6">
-                   <h4 className="text-[9px] lg:text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1 lg:ml-2">Distribution</h4>
-                   <div className="space-y-4 lg:space-y-4">
-                      {[
-                        { name: 'Dine-in Revenue', val: '₹7.2L', pct: 65, color: 'bg-primary' },
-                        { name: 'Takeaway Revenue', val: '₹3.1L', pct: 25, color: 'bg-orange-400' },
-                        { name: 'Delivery Revenue', val: '₹1.1L', pct: 10, color: 'bg-indigo-300' },
-                      ].map((item, i) => (
-                        <div key={i} className="space-y-1.5 lg:space-y-2 group">
-                           <div className="flex justify-between items-end">
-                              <span className="text-[8px] lg:text-[10px] font-black uppercase tracking-widest text-text-secondary group-hover:text-primary">{item.name}</span>
-                              <span className="text-xs lg:text-sm font-black text-text-primary">{item.val}</span>
-                           </div>
-                           <div className="h-1.5 lg:h-2 bg-slate-50 rounded-full overflow-hidden shadow-inner">
-                              <div 
-                                style={{ width: `${item.pct}%` }}
-                                className={cn("h-full rounded-full", item.color)}
-                              />
-                           </div>
-                        </div>
-                      ))}
-                   </div>
-                </div>
-
-                <div className="p-5 lg:p-6 bg-primary rounded-[2rem] lg:rounded-[3rem] text-white shadow-2xl relative group overflow-hidden">
-                   <div className="relative z-10">
-                      <p className="text-white/40 text-[8px] lg:text-[10px] font-black uppercase tracking-widest mb-1.5 lg:mb-2">Benchmarking</p>
-                      <h4 className="text-xl lg:text-3xl font-black tracking-tighter uppercase mb-4 lg:mb-6 leading-none">Delta Delta</h4>
-                      <div className="grid grid-cols-2 gap-6 lg:gap-8">
-                         <div>
-                            <p className="text-[7px] lg:text-[8px] font-black text-white/40 uppercase tracking-widest mb-1 lg:mb-1.5">Ratio</p>
-                            <p className="text-xl lg:text-2xl font-black text-white tracking-tighter">+12.4%</p>
-                         </div>
-                         <div>
-                            <p className="text-[7px] lg:text-[8px] font-black text-white/40 uppercase tracking-widest mb-1 lg:mb-1.5">Vector</p>
-                            <p className="text-xl lg:text-2xl font-black text-emerald-500 tracking-tighter uppercase">Optimal</p>
-                         </div>
-                      </div>
-                   </div>
-                   <BarChart3 className="absolute -bottom-8 lg:-bottom-10 -right-8 lg:-right-10 w-32 lg:w-44 h-32 lg:h-44 text-primary opacity-5" />
-                </div>
-             </div>
-
-             <div className="px-5 py-5 lg:px-6 lg:py-6 border-t border-slate-50 bg-slate-50/20 shrink-0">
-                <button onClick={() => setSelectedMetric(null)} className="w-full py-3.5 lg:py-4.5 bg-primary text-white rounded-xl lg:rounded-2xl font-black text-[9px] lg:text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20">Close Intelligence</button>
-             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Date Range Modal */}
-      {showDateModal && (
-        <div className="fixed inset-0 z-[550] flex items-center justify-center p-4 lg:p-6">
-           <div onClick={() => setShowDateModal(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" />
-           <div 
-             className="relative w-full max-w-[90%] md:max-w-sm bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 shadow-2xl overflow-hidden self-center"
-           >
-             <div className="w-14 h-14 lg:w-16 lg:h-16 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6 shrink-0">
-               <Calendar className="w-7 lg:w-8 h-7 lg:h-8" />
-             </div>
-             <h3 className="text-lg lg:text-2xl font-black text-center uppercase tracking-tight">Temporal Filter</h3>
-             <div className="mt-6 lg:mt-8 space-y-2 lg:space-y-3">
-                {['Today', 'This Week', 'This Month', 'Last 90 Days', 'Financial Year'].map(range => (
+              
+              <div className="flex gap-2">
+                {['Revenue', 'Occupancy'].map((tab) => (
                   <button 
-                    key={range}
-                    onClick={() => { setTimeRange(range); setShowDateModal(false); showToast(`Filter applied: ${range}`); }}
+                    key={tab}
+                    onClick={() => setActiveChartTab(tab)}
                     className={cn(
-                      "w-full py-3.5 lg:py-4 rounded-xl lg:rounded-2xl font-black uppercase tracking-widest text-[8px] lg:text-[9px] border-2 whitespace-nowrap transition-all",
-                      timeRange === range ? "bg-primary text-white border-primary shadow-xl shadow-primary/20" : "bg-white border-slate-50 text-slate-400 hover:border-primary/20"
+                      "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                      activeChartTab === tab ? "bg-slate-100 text-text-primary" : "text-slate-400 hover:bg-slate-50"
                     )}
                   >
-                    {range}
+                    {tab}
                   </button>
                 ))}
-             </div>
-             <button onClick={() => setShowDateModal(false)} className="mt-6 lg:mt-8 w-full text-[8px] lg:text-[9px] font-black text-slate-300 uppercase tracking-widest hover:text-rose-500">Cancel</button>
-           </div>
-        </div>
-      )}
+              </div>
+            </div>
 
-      {/* Heatmap Modal */}
-      {showHeatmap && (
-        <div className="fixed inset-0 z-[550] flex items-center justify-center p-4 lg:p-6">
-           <div onClick={() => setShowHeatmap(false)} className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" />
-           <div 
-             className="relative w-full max-w-[95%] md:max-w-4xl bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] self-center"
-           >
-              <div className="p-6 lg:p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30 shrink-0">
-                 <div className="flex items-center gap-3 lg:gap-4">
-                    <div className="p-2.5 lg:p-3 bg-indigo-50 text-primary rounded-xl shrink-0">
-                       <Clock className="w-5 lg:w-6 h-5 lg:h-6" />
+            <div className="flex-1 w-full bg-slate-50/50 rounded-3xl border border-slate-100 flex items-center justify-center relative overflow-hidden group">
+              <div className="text-center">
+                <BarChart3 className="w-16 h-16 text-slate-200 mx-auto mb-4 group-hover:scale-110 transition-transform duration-500" />
+                <p className="text-sm font-bold text-slate-400">Interactive charts will render here.</p>
+                <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-2">Requires Chart.js or Recharts</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Performance Table */}
+          <div className="card bg-white border-none shadow-xl shadow-slate-100/50 p-0 rounded-[2.5rem] flex flex-col h-[500px] overflow-hidden">
+            <div className="p-6 border-b border-slate-50 bg-slate-50/30">
+              <h3 className="text-lg font-black text-text-primary uppercase tracking-tight">Top Performers</h3>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Villas & Guests</p>
+              
+              <div className="relative mt-4">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                <input 
+                  type="text" 
+                  placeholder="Search..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-xs font-bold transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto scrollbar-hide p-2">
+              {filteredPerformance.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between p-4 hover:bg-slate-50 rounded-2xl transition-all cursor-pointer group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-black">
+                      {item.name.charAt(0)}
                     </div>
                     <div>
-                       <h3 className="text-lg lg:text-xl font-black uppercase tracking-tight leading-none">Traffic Heatmap</h3>
-                       <p className="text-[8px] lg:text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1.5 lg:mt-0.5 leading-none">Real-time occupancy & density</p>
+                      <p className="text-sm font-black text-text-primary tracking-tight">{item.name}</p>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{item.type}</p>
                     </div>
-                 </div>
-                 <button onClick={() => setShowHeatmap(false)} className="p-2 hover:bg-slate-100 rounded-xl">
-                    <X className="w-6 h-6 text-slate-400" />
-                 </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 lg:p-10 scrollbar-hide">
-                 <div className="mb-10 overflow-x-auto pb-4 scrollbar-hide">
-                    <div className="min-w-[800px]">
-                       <div className="grid grid-cols-[repeat(24,1fr)] gap-1 mb-8">
-                          {/* Hours markers */}
-                          <div className="grid grid-cols-[repeat(24,1fr)] gap-1 mb-4 px-2">
-                             <div className="col-span-[6] flex justify-start"><span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">12 AM</span></div>
-                             <div className="col-span-[6] flex justify-start"><span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">6 AM</span></div>
-                             <div className="col-span-[6] flex justify-start"><span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">12 PM</span></div>
-                             <div className="col-span-[5] flex justify-start"><span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">6 PM</span></div>
-                             <div className="col-span-[1] flex justify-end"><span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">11 PM</span></div>
-                          </div>
-                          
-                          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                            <React.Fragment key={day}>
-                               <div className="col-span-[2] flex items-center">
-                                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{day}</span>
-                               </div>
-                               <div className="col-span-[22] grid grid-cols-[repeat(24,1fr)] gap-1 h-8 sm:h-10">
-                                  {Array.from({ length: 24 }).map((_, i) => {
-                                     // Mock logic for heat intensity
-                                     const isWeekend = day === 'Sat' || day === 'Sun';
-                                     const isLunch = i >= 12 && i <= 14;
-                                     const isDinner = i >= 19 && i <= 21;
-                                     let intensity = "bg-slate-50";
-                                     if ((isLunch || isDinner) && isWeekend) intensity = "bg-primary";
-                                     else if (isLunch || isDinner) intensity = "bg-indigo-300";
-                                     else if (i >= 9 && i <= 22) intensity = "bg-indigo-100";
-                                     
-                                     return (
-                                       <div 
-                                         key={i} 
-                                         className={cn("rounded-md transition-all hover:scale-110 cursor-pointer", intensity)} 
-                                         title={`${day} ${i}:00`}
-                                       />
-                                     );
-                                  })}
-                               </div>
-                            </React.Fragment>
-                          ))}
-                       </div>
-                    </div>
-                 </div>
-
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100/50">
-                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Busiest Day</p>
-                       <h5 className="text-xl font-black text-primary uppercase tracking-tight">Saturday</h5>
-                       <p className="text-[10px] font-medium text-text-secondary mt-1">Average 240+ covers</p>
-                    </div>
-                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100/50">
-                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Wait Time Avg</p>
-                       <h5 className="text-xl font-black text-orange-500 uppercase tracking-tight">12 Minutes</h5>
-                       <p className="text-[10px] font-medium text-text-secondary mt-1">During peak dinner hours</p>
-                    </div>
-                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100/50 sm:col-span-2 lg:col-span-1">
-                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Optimal Staffing</p>
-                       <h5 className="text-xl font-black text-emerald-500 uppercase tracking-tight">Level 4</h5>
-                       <p className="text-[10px] font-medium text-text-secondary mt-1">All stations fully active</p>
-                    </div>
-                 </div>
-              </div>
-
-              <div className="p-6 lg:p-8 border-t border-slate-50 bg-slate-50/30 shrink-0">
-                 <button onClick={() => setShowHeatmap(false)} className="w-full py-4 bg-primary text-white rounded-xl lg:rounded-2xl font-black text-[9px] lg:text-[10px] uppercase tracking-widest shadow-xl shadow-primary/20">Close Heatmap View</button>
-              </div>
-           </div>
-        </div>
-      )}
-
-
-
-      {/* Hidden Printable Report */}
-      <div id="printable-area" className="hidden print:block printable-area">
-        <div className="text-center border-b-2 border-slate-900 pb-6 mb-8">
-          <h1 className="text-3xl font-black uppercase tracking-tighter">Business Intelligence Report</h1>
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-slate-500 mt-2">The Luxe Grande • {timeRange}</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-8 mb-12">
-          {stats.map(stat => (
-            <div key={stat.id} className="p-6 border border-slate-200 rounded-2xl">
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">{stat.label}</p>
-              <h2 className="text-2xl font-black text-slate-900">{stat.value}</h2>
-              <p className="text-[9px] font-bold text-slate-500 mt-1 uppercase">Trend: {stat.trend}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="mb-12">
-          <h3 className="text-sm font-black uppercase tracking-widest mb-6 border-b border-slate-200 pb-2">Yield Performance Logs</h3>
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-900">
-                <th className="py-4 uppercase font-black">Domain</th>
-                <th className="py-4 uppercase font-black">Role</th>
-                <th className="py-4 uppercase font-black">Units</th>
-                <th className="py-4 uppercase font-black">Yield</th>
-                <th className="py-4 uppercase font-black text-right">Service</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {performanceData.map((row, i) => (
-                <tr key={i}>
-                  <td className="py-4 font-black uppercase">{row.name}</td>
-                  <td className="py-4 font-bold uppercase text-slate-500">{row.role}</td>
-                  <td className="py-4 font-black">{row.orders}</td>
-                  <td className="py-4 font-black text-primary">{row.revenue}</td>
-                  <td className="py-4 text-right font-black">{row.rating} ★</td>
-                </tr>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-primary tracking-tighter">{item.revenue}</p>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{item.bookings} Bookings</p>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-20 flex justify-between items-center pt-8 border-t border-slate-200">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Report Generated</p>
-            <p className="text-xs font-bold text-slate-900 uppercase">{new Date().toLocaleString()}</p>
+            </div>
+            
+            <div className="p-4 border-t border-slate-50 bg-white">
+              <button className="w-full py-3 text-xs font-black uppercase tracking-widest text-primary hover:bg-indigo-50 rounded-xl transition-all flex items-center justify-center gap-2">
+                View Full Leaderboard <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-          <div className="text-right">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">System Signature</p>
-            <p className="text-xs font-bold text-slate-900 uppercase italic">Gila House Analytics Hub</p>
-          </div>
+          
         </div>
       </div>
     </div>

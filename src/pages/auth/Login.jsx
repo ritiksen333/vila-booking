@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth, roles } from '../../context/AuthContext';
 import { LogIn, Mail, Lock, CookingPot } from 'lucide-react';
 import { motion } from 'framer-motion';
-import foodHero from '../../assets/food-hero.png';
+
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -19,9 +19,6 @@ const Login = () => {
     setTimeout(() => {
       let role = roles.ADMIN;
       if (email.includes('manager')) role = roles.MANAGER;
-      else if (email.includes('waiter')) role = roles.WAITER;
-      else if (email.includes('chef')) role = roles.CHEF;
-      else if (email.includes('cashier')) role = roles.CASHIER;
       else if (email.includes('customer')) role = roles.CUSTOMER;
 
       login(role);
@@ -30,9 +27,6 @@ const Login = () => {
       switch (role) {
         case roles.ADMIN: navigate('/admin/dashboard'); break;
         case roles.MANAGER: navigate('/manager/dashboard'); break;
-        case roles.WAITER: navigate('/waiter/dashboard'); break;
-        case roles.CHEF: navigate('/chef/dashboard'); break;
-        case roles.CASHIER: navigate('/cashier/dashboard'); break;
         case roles.CUSTOMER: navigate('/customer/home'); break;
         default: navigate('/dashboard');
       }
@@ -41,15 +35,12 @@ const Login = () => {
 
   const handleDemoLogin = (role) => {
     const roleEmails = {
-      ADMIN: 'admin@gilahouse.com',
-      MANAGER: 'manager@gilahouse.com',
-      WAITER: 'waiter@gilahouse.com',
-      CHEF: 'chef@gilahouse.com',
-      CASHIER: 'cashier@gilahouse.com',
-      CUSTOMER: 'customer@gilahouse.com'
+      ADMIN: 'admin@lumierevillas.com',
+      MANAGER: 'manager@lumierevillas.com',
+      CUSTOMER: 'customer@lumierevillas.com'
     };
     
-    setEmail(roleEmails[role] || `${role.toLowerCase()}@gilahouse.com`);
+    setEmail(roleEmails[role] || `${role.toLowerCase()}@lumierevillas.com`);
     setPassword('password123');
   };
 
@@ -58,7 +49,7 @@ const Login = () => {
       {/* Background Image Layer (Faint) */}
       <div
         className="absolute inset-0 opacity-20 bg-cover bg-center grayscale scale-110 fixed"
-        style={{ backgroundImage: `url(${foodHero})` }}
+        style={{ backgroundImage: `url('/luxury-villa-hero.png')` }}
       />
 
       {/* Main Glass Card */}
@@ -74,7 +65,7 @@ const Login = () => {
             initial={{ scale: 1.1, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.2 }}
-            src={foodHero}
+            src="/luxury-villa-hero.png"
             alt="Food Hero"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
@@ -90,7 +81,7 @@ const Login = () => {
                   <img src="/1000464407-removebg-preview.png" alt="Logo" className="w-full h-full object-contain" />
                 </div>
                 <span className="text-3xl font-black tracking-tighter text-white drop-shadow-2xl uppercase">
-                  Gila<span className="text-primary">House</span>
+                LUMIÈRE <span className="text-primary">VILLAS</span>
                 </span>
               </div>
             </div>
@@ -110,7 +101,7 @@ const Login = () => {
                 <img src="/1000464407-removebg-preview.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <span className="text-xl font-black tracking-tight text-white uppercase">
-                Gila<span className="text-primary">House</span>
+                LUMIÈRE <span className="text-primary">VILLAS</span>
               </span>
             </div>
           </div>

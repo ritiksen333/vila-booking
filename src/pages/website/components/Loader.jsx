@@ -27,7 +27,7 @@ const Loader = () => {
         transition={{ repeat: Infinity, duration: 1.5 }}
         className="mt-8 text-gray-500 font-bold uppercase tracking-[0.3em] text-xs"
       >
-        Gila House Loading
+        LUMIÈRE VILLAS Loading
       </motion.p>
     </div>
   );
