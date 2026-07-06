@@ -57,7 +57,7 @@ const Excursions = () => {
         </Link>
         
         <nav className="hidden md:flex items-center gap-4 lg:gap-8">
-          <Link to="/menu" className="text-xs lg:text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Restaurant</Link>
+          <Link to="/menu" className="text-xs lg:text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">In-Villa Dining</Link>
           <Link to="/excursions" className="text-xs lg:text-sm font-bold text-orange-500 border-b-2 border-orange-500 pb-1">Excursions</Link>
           <Link to="/transport" className="text-xs lg:text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Transport</Link>
         </nav>
@@ -123,7 +123,7 @@ const Excursions = () => {
 
         <div className="mt-16 md:mt-32 text-center">
            <div className="inline-flex items-center gap-2 text-[10px] md:text-xs font-black text-gray-300 uppercase tracking-widest">
-              Visit us to order <ChevronRight size={14} /> LUMIÈRE VILLAS Restaurant & Bar
+              Visit us to order <ChevronRight size={14} /> LUMIÈRE VILLAS In-Villa Dining & Bar
            </div>
         </div>
       </main>

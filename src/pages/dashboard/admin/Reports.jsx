@@ -65,24 +65,65 @@ const Reports = () => {
     showToast('Print command sent');
   };
 
-  // Real-time calculations
-  const totalRevenue = folios.reduce((acc, f) => acc + (f.total || 0), 0);
-  const totalGuests = reservations.reduce((acc, r) => acc + (parseInt(r.guests) || 0), 0);
+  // Real-time calculations with Time Range filtering
+  const isDateInRange = (dateString) => {
+    if (!dateString) return true;
+    const itemDate = new Date(dateString);
+    const now = new Date();
+    
+    // Normalize time to compare just dates
+    itemDate.setHours(0,0,0,0);
+    const today = new Date(now);
+    today.setHours(0,0,0,0);
+    
+    if (timeRange === 'Today') {
+      return itemDate.getTime() === today.getTime();
+    }
+    if (timeRange === 'This Week') {
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday as start
+      return itemDate >= startOfWeek && itemDate <= today;
+    }
+    if (timeRange === 'This Month') {
+      return itemDate.getMonth() === today.getMonth() && itemDate.getFullYear() === today.getFullYear();
+    }
+    return true; // For 'Custom' show all for now
+  };
+
+  // Calculate filtered revenue by checking each item's date inside folios
+  const filteredRevenue = folios.reduce((total, folio) => {
+    const folioRangeTotal = folio.items?.reduce((sum, item) => {
+      return isDateInRange(item.date) ? sum + (item.amount || 0) : sum;
+    }, 0) || 0;
+    return total + folioRangeTotal;
+  }, 0);
+
+  // Filter reservations based on their date
+  const filteredReservations = reservations.filter(r => isDateInRange(r.date));
+  const filteredGuests = filteredReservations.reduce((acc, r) => acc + (parseInt(r.guests) || 0), 0);
+  
+  // Current Occupancy doesn't depend on time range, it's live status. But we can show it as is.
   const occupiedVillas = villas.filter(v => v.status === 'Occupied' || v.status === 'Checked In').length;
   const occupancyRate = villas.length > 0 ? Math.round((occupiedVillas / villas.length) * 100) : 0;
-  const netProfit = totalRevenue * 0.75; // Mock profit margin of 75%
+  const netProfit = filteredRevenue * 0.75; // Mock profit margin of 75%
 
   const stats = [
-    { id: 'revenue', label: 'Total Revenue', value: `₹${totalRevenue.toLocaleString()}`, trend: '+14.2%', up: true, icon: DollarSign, color: 'primary', description: 'Total gross income from bookings.' },
+    { id: 'revenue', label: 'Total Revenue', value: `₹${filteredRevenue.toLocaleString()}`, trend: '+14.2%', up: true, icon: DollarSign, color: 'primary', description: 'Total gross income from bookings.' },
     { id: 'occupancy', label: 'Occupancy Rate', value: `${occupancyRate}%`, trend: '+5.5%', up: true, icon: Home, color: 'orange', description: 'Current percentage of villas booked.' },
-    { id: 'guests', label: 'Total Guests', value: totalGuests.toLocaleString(), trend: '+2.4%', up: true, icon: Users, color: 'purple', description: 'Total number of guests hosted.' },
+    { id: 'guests', label: 'Total Guests', value: filteredGuests.toLocaleString(), trend: '+2.4%', up: true, icon: Users, color: 'purple', description: 'Total number of guests hosted.' },
     { id: 'profit', label: 'Net Profit', value: `₹${netProfit.toLocaleString()}`, trend: '+12.1%', up: true, icon: Target, color: 'success', description: 'Earnings after operating costs.' },
   ];
 
   const performanceData = villas.map(villa => {
-    const villaReservations = reservations.filter(r => r.targetId === villa.name);
+    const villaReservations = filteredReservations.filter(r => r.targetId === villa.name);
+    
     const villaFolios = folios.filter(f => f.roomName === villa.name);
-    const villaRevenue = villaFolios.reduce((acc, f) => acc + (f.total || 0), 0);
+    const villaRevenue = villaFolios.reduce((total, folio) => {
+      const folioRangeTotal = folio.items?.reduce((sum, item) => {
+        return isDateInRange(item.date) ? sum + (item.amount || 0) : sum;
+      }, 0) || 0;
+      return total + folioRangeTotal;
+    }, 0);
     
     return {
       name: villa.name,

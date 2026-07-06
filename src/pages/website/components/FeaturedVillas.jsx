@@ -11,7 +11,7 @@ const villas = [
   { id: 6, name: 'Alpine Chalet', location: 'Zermatt, Switzerland', price: '$1100', rating: 4.9, guests: 8, size: '400 sqm', img: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' }
 ];
 
-const FeaturedFood = () => {
+const FeaturedVillas = () => {
   return (
     <section className="py-24 bg-background overflow-hidden" id="villas">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -79,4 +79,4 @@ const FeaturedFood = () => {
   );
 };
 
-export default FeaturedFood;
+export default FeaturedVillas;

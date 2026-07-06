@@ -40,6 +40,8 @@ import QRManager from './pages/dashboard/admin/QRManager';
 import ServiceManager from './pages/dashboard/admin/ServiceManager';
 import Tasks from './pages/dashboard/admin/Tasks';
 import Inventory from './pages/dashboard/admin/Inventory';
+import PromoCodes from './pages/dashboard/admin/PromoCodes';
+import Analytics from './pages/dashboard/admin/Analytics';
 
 // Dashboard - Waiter
 import POS from './pages/dashboard/waiter/POS';
@@ -174,6 +176,8 @@ function App() {
                       <Route path="/services" element={<ModuleRedirect module="services" />} />
                       <Route path="/qr-manager" element={<ModuleRedirect module="qr-manager" />} />
                       <Route path="/notifications" element={<ModuleRedirect module="notifications" />} />
+                      <Route path="/analytics" element={<ModuleRedirect module="analytics" />} />
+                      <Route path="/promo-codes" element={<ModuleRedirect module="promo-codes" />} />
                       <Route path="/settings" element={<ModuleRedirect module="settings" />} />
 
                       {/* Role-Specific Module Routes */}
@@ -234,6 +238,12 @@ function App() {
                       <Route path="/:role/reports" element={
                         <ProtectedRoute allowedRoles={[roles.ADMIN, roles.MANAGER]}>
                           <MainLayout><Reports /></MainLayout>
+                        </ProtectedRoute>
+                      } />
+
+                      <Route path="/:role/analytics" element={
+                        <ProtectedRoute allowedRoles={[roles.ADMIN, roles.MANAGER]}>
+                          <MainLayout><Analytics /></MainLayout>
                         </ProtectedRoute>
                       } />
 
@@ -308,6 +318,12 @@ function App() {
                       <Route path="/:role/notifications" element={
                         <ProtectedRoute allowedRoles={[roles.ADMIN, roles.MANAGER, roles.WAITER, roles.CHEF, roles.CASHIER]}>
                           <MainLayout><NotificationsPage /></MainLayout>
+                        </ProtectedRoute>
+                      } />
+
+                      <Route path="/:role/promo-codes" element={
+                        <ProtectedRoute allowedRoles={[roles.ADMIN]}>
+                          <MainLayout><PromoCodes /></MainLayout>
                         </ProtectedRoute>
                       } />
 

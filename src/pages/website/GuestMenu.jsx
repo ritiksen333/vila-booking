@@ -19,6 +19,37 @@ const GuestMenu = () => {
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const tabs = ['All', 'Breakfast', 'Lunch', 'Dinner', 'Bar'];
 
+  const { addNotification } = useNotifications();
+  const { addReservation, promoCodes } = useHospitality();
+  
+  // Promo Codes State
+  const [promoCode, setPromoCode] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoError, setPromoError] = useState('');
+
+  const handleApplyPromo = (e) => {
+    if (e) e.preventDefault();
+    setPromoError('');
+    const code = promoCode.trim().toUpperCase();
+    
+    const validPromo = promoCodes.find(p => p.code === code && p.status === 'Active');
+    
+    if (validPromo) {
+      setAppliedPromo({ code: validPromo.code, percent: validPromo.percent });
+      setPromoCode('');
+    } else {
+      setPromoError('Invalid or expired promo code.');
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+  };
+
+  const subtotal = 120000;
+  const discountAmount = appliedPromo ? Math.round((subtotal * appliedPromo.percent) / 100) : 0;
+  const finalPrice = subtotal - discountAmount;
+
   const filteredMenu = activeTab === 'All' 
     ? guestMenuData 
     : guestMenuData.filter(item => item.category === activeTab);
@@ -133,7 +164,7 @@ const GuestMenu = () => {
             </div>
             <div className="relative z-10 text-right">
                <p className="text-xs font-black opacity-60">Total</p>
-               <p className="text-lg font-black tracking-tight">Rp 120.000</p>
+               <p className="text-lg font-black tracking-tight">Rp {finalPrice.toLocaleString('id-ID')}</p>
             </div>
          </button>
       </div>
@@ -211,7 +242,7 @@ const GuestMenu = () => {
               </div>
 
               {/* Special Notes */}
-              <div className="mb-8">
+              <div className="mb-6">
                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Special notes (optional)</label>
                  <textarea 
                    rows="2" 
@@ -220,10 +251,56 @@ const GuestMenu = () => {
                  />
               </div>
 
+              {/* Promo Code */}
+              <div className="mb-6">
+                {appliedPromo ? (
+                  <div className="flex justify-between items-center text-sm font-bold text-emerald-600 bg-emerald-50 p-3 rounded-2xl border border-emerald-100">
+                    <div className="flex flex-col">
+                       <span>Discount ({appliedPromo.percent}%)</span>
+                       <span className="text-[10px] uppercase tracking-widest mt-0.5">{appliedPromo.code}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                       <span>-Rp {discountAmount.toLocaleString('id-ID')}</span>
+                       <button onClick={(e) => { e.preventDefault(); handleRemovePromo(); }} className="text-emerald-400 hover:text-emerald-700 p-1">
+                         <X size={16} />
+                       </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center gap-2 w-full">
+                       <input 
+                         type="text" 
+                         value={promoCode}
+                         onChange={(e) => setPromoCode(e.target.value)}
+                         placeholder="Promo Code" 
+                         className="flex-1 min-w-0 px-4 py-3 bg-gray-50/50 border border-gray-100 rounded-2xl outline-none text-sm font-bold uppercase focus:border-orange-500 transition-all placeholder:normal-case"
+                       />
+                       <button 
+                         type="button"
+                         onClick={handleApplyPromo}
+                         className="shrink-0 px-5 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20"
+                       >
+                         Apply
+                       </button>
+                    </div>
+                    {promoError && <p className="text-[10px] font-bold text-red-500 mt-2 px-1">{promoError}</p>}
+                  </div>
+                )}
+              </div>
+
               {/* Total */}
-              <div className="bg-orange-50 p-5 rounded-2xl flex items-center justify-between mb-8 border border-orange-100/50">
-                 <span className="text-sm font-black text-slate-800">Total</span>
-                 <span className="text-xl font-black text-orange-500 tracking-tighter">Rp 120.000</span>
+              <div className="bg-orange-50 p-5 rounded-2xl flex flex-col gap-2 mb-8 border border-orange-100/50">
+                 {appliedPromo && (
+                   <div className="flex items-center justify-between opacity-50">
+                     <span className="text-xs font-bold text-slate-800">Subtotal</span>
+                     <span className="text-sm font-black text-slate-800">Rp {subtotal.toLocaleString('id-ID')}</span>
+                   </div>
+                 )}
+                 <div className="flex items-center justify-between">
+                   <span className="text-sm font-black text-slate-800">Total</span>
+                   <span className="text-xl font-black text-orange-500 tracking-tighter">Rp {finalPrice.toLocaleString('id-ID')}</span>
+                 </div>
               </div>
 
               {/* Payment Methods */}
@@ -288,11 +365,11 @@ const GuestMenu = () => {
 
               {/* Amount Due Card */}
               <div className="bg-orange-50/50 p-6 rounded-[1.5rem] flex items-center justify-between mb-6 border border-orange-100/30">
-                 <div>
+                  <div>
                     <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1">Order ORD-20260507-E9VH</p>
                     <p className="text-sm font-black text-slate-800">Amount due</p>
                  </div>
-                 <span className="text-2xl font-black text-orange-500 tracking-tighter">Rp 120.000</span>
+                 <span className="text-2xl font-black text-orange-500 tracking-tighter">Rp {finalPrice.toLocaleString('id-ID')}</span>
               </div>
 
               {/* Timer */}

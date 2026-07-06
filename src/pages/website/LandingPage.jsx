@@ -3,7 +3,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import EcosystemGrid from './components/EcosystemGrid';
 import Stats from './components/Stats';
-import FeaturedFood from './components/FeaturedFood';
+import FeaturedVillas from './components/FeaturedVillas';
 import HospitalityService from './components/HospitalityService';
 import About from './components/About';
 import Services from './components/Services';
@@ -33,7 +33,7 @@ const LandingPage = () => {
         <Hero />
         {/* <EcosystemGrid /> replaced by AvailabilitySearch */}
         <EcosystemGrid />
-        <FeaturedFood /> {/* This will be Featured Villas */}
+        <FeaturedVillas /> {/* This will be Featured Villas */}
         <HospitalityService /> {/* This will be Villa Details Preview */}
         <Stats /> {/* This will be Availability Calendar */}
         <Reservation /> {/* This will be Booking Form */}

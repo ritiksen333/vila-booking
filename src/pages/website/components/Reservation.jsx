@@ -4,9 +4,11 @@ import { createPortal } from 'react-dom';
 import { useHospitality } from '../../../context/HospitalityContext';
 import { CheckCircle2, Clock, XCircle, CreditCard, X, Calendar as CalendarIcon, ChevronRight, Lock, Search, Info } from 'lucide-react';
 import { cn } from '../../../utils/cn';
+import { useTranslation } from 'react-i18next';
 
 const Reservation = () => {
-  const { rooms, reservations, addReservation, updateReservation, cancelReservation } = useHospitality();
+  const { rooms, reservations, addReservation, updateReservation, cancelReservation, promoCodes } = useHospitality();
+  const { t } = useTranslation();
   
   const [activeTab, setActiveTab] = useState('book'); // 'book' | 'track'
   
@@ -40,21 +42,18 @@ const Reservation = () => {
   const [appliedPromo, setAppliedPromo] = useState(null); // { code: '...', percent: 10 }
   const [promoError, setPromoError] = useState('');
 
-  const promoCodes = {
-    'LUMIERE10': 10,
-    'WELCOME20': 20,
-    'BALILIFE': 15
-  };
-
   const handleApplyPromo = (e) => {
     if (e) e.preventDefault();
     setPromoError('');
     const code = promoCode.trim().toUpperCase();
-    if (promoCodes[code]) {
-      setAppliedPromo({ code, percent: promoCodes[code] });
+    
+    const validPromo = promoCodes.find(p => p.code === code && p.status === 'Active');
+    
+    if (validPromo) {
+      setAppliedPromo({ code: validPromo.code, percent: validPromo.percent });
       setPromoCode('');
     } else {
-      setPromoError('Invalid promo code.');
+      setPromoError('Invalid or expired promo code.');
     }
   };
 
@@ -275,7 +274,7 @@ const Reservation = () => {
             {activeTab === 'book' && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 <div className="lg:col-span-2">
-                  <h3 className="text-xl font-black text-text-primary uppercase tracking-tight mb-8">Reservation Details</h3>
+                  <h3 className="text-xl font-black text-text-primary uppercase tracking-tight mb-8">{t('reservation_details') || 'Reservation Details'}</h3>
                   
                   {error && (
                     <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3">
@@ -288,22 +287,22 @@ const Reservation = () => {
                     {/* Form fields here (kept same structure) */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">First Name</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{t('first_name') || 'First Name'}</label>
                         <input type="text" name="firstName" value={formData.firstName} onChange={handleInputChange} required className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold transition-all" placeholder="John" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Last Name</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{t('last_name') || 'Last Name'}</label>
                         <input type="text" name="lastName" value={formData.lastName} onChange={handleInputChange} required className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold transition-all" placeholder="Doe" />
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{t('email') || 'Email'}</label>
                         <input type="email" name="email" value={formData.email} onChange={handleInputChange} required className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold transition-all" placeholder="john@example.com" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{t('phone') || 'Phone'}</label>
                         <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} required className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold transition-all" placeholder="+1 234 567 8900" />
                       </div>
                     </div>
@@ -334,28 +333,28 @@ const Reservation = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Check-in</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{t('check_in') || 'Check-in'}</label>
                         <input type="date" name="checkIn" value={formData.checkIn} onChange={handleInputChange} required min={new Date().toISOString().split('T')[0]} className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold transition-all" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Check-out</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{t('check_out') || 'Check-out'}</label>
                         <input type="date" name="checkOut" value={formData.checkOut} onChange={handleInputChange} required min={formData.checkIn || new Date().toISOString().split('T')[0]} className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold transition-all" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Guests</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">{t('guests_count') || 'Guests'}</label>
                         <input type="number" name="guests" value={formData.guests} onChange={handleInputChange} min="1" max="10" required className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold transition-all" />
                       </div>
                     </div>
 
                     <button type="submit" className="w-full h-14 btn-primary rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-primary/20 hover:-translate-y-0.5 transition-all">
-                      Confirm Reservation
+                      {t('confirm_reservation') || 'Confirm Reservation'}
                     </button>
                   </form>
                 </div>
 
                 {/* Summary Sidebar */}
                 <div className="bg-slate-50 rounded-3xl p-8 h-fit lg:sticky lg:top-24 border border-slate-100">
-                  <h3 className="text-lg font-black text-text-primary uppercase tracking-tight mb-6">Booking Summary</h3>
+                  <h3 className="text-lg font-black text-text-primary uppercase tracking-tight mb-6">{t('booking_summary') || 'Booking Summary'}</h3>
                   
                   {selectedRoom && (
                     <div className="space-y-6">
@@ -370,17 +369,53 @@ const Reservation = () => {
                       <div className="space-y-3 pt-4 border-t border-slate-200/60">
                         <div className="flex justify-between items-center text-sm font-bold text-text-secondary">
                           <span>{nights} {nights === 1 ? 'Night' : 'Nights'}</span>
-                          <span>₹{(selectedRoom.price * nights).toLocaleString()}</span>
+                          <span>₹{(totalPrice).toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between items-center text-sm font-bold text-text-secondary">
                           <span>Taxes & Fees</span>
                           <span>Included</span>
                         </div>
+                        
+                        {/* Promo Code UI */}
+                        {appliedPromo ? (
+                          <div className="flex justify-between items-center text-sm font-bold text-emerald-600 bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                            <div className="flex flex-col">
+                               <span>Discount ({appliedPromo.percent}%)</span>
+                               <span className="text-[10px] uppercase tracking-widest mt-0.5">{appliedPromo.code}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                               <span>-₹{discountAmount.toLocaleString()}</span>
+                               <button onClick={(e) => { e.preventDefault(); handleRemovePromo(); }} className="text-emerald-400 hover:text-emerald-700 p-1">
+                                 <X className="w-4 h-4" />
+                               </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="pt-2">
+                             <div className="flex items-center gap-2 w-full">
+                               <input 
+                                 type="text" 
+                                 value={promoCode}
+                                 onChange={(e) => setPromoCode(e.target.value)}
+                                 placeholder="Promo Code" 
+                                 className="flex-1 min-w-0 px-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-xs font-bold uppercase focus:border-primary transition-all placeholder:normal-case"
+                               />
+                               <button 
+                                 type="button"
+                                 onClick={handleApplyPromo}
+                                 className="shrink-0 px-4 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-md"
+                               >
+                                 Apply
+                               </button>
+                             </div>
+                             {promoError && <p className="text-[10px] font-bold text-rose-500 mt-2">{promoError}</p>}
+                          </div>
+                        )}
                       </div>
 
                       <div className="pt-4 border-t border-slate-200/60 flex justify-between items-center">
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Estimate</span>
-                        <span className="text-2xl font-black text-primary">₹{totalPrice.toLocaleString()}</span>
+                        <span className="text-2xl font-black text-primary">₹{finalPrice.toLocaleString()}</span>
                       </div>
                     </div>
                   )}

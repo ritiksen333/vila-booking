@@ -96,7 +96,7 @@ const Staff = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
         <div>
           <h2 className="text-xl lg:text-2xl font-black text-text-primary uppercase tracking-tight leading-none">Staff Directory</h2>
-          <p className="text-text-secondary mt-1 text-xs lg:text-sm font-medium">Manage your restaurant team.</p>
+          <p className="text-text-secondary mt-1 text-xs lg:text-sm font-medium">Manage your villa team.</p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
            <div className="relative group flex-1 sm:min-w-[200px]">

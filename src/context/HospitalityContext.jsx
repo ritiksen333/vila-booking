@@ -34,20 +34,61 @@ export const HospitalityProvider = ({ children }) => {
     ];
   });
 
+  const getMockDate = (offsetDays) => {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    return d.toISOString().split('T')[0];
+  };
+
   const [reservations, setReservations] = useState(() => {
     const saved = localStorage.getItem('resto-hospitality-reservations');
     return saved ? JSON.parse(saved) : [
-      { id: 'RES-8821', guestName: 'Alexander Wright', type: 'Room', targetId: 'ROYAL SUITE', date: '2026-05-10', time: '14:00', guests: 2, status: 'Checked In', notes: 'VIP Treatment requested' },
-      { id: 'RES-8822', guestName: 'Elena Gilbert', type: 'Table', targetId: 'T-03', date: '2026-05-08', time: '19:30', guests: 4, status: 'Pending', notes: 'Birthday celebration' },
-      { id: 'RES-8823', guestName: 'James Miller', type: 'Room', targetId: 'DELUXE SEAVIEW', date: '2026-05-12', time: '12:00', guests: 1, status: 'Confirmed', notes: 'Business trip' },
-      { id: 'RES-8824', guestName: 'Sarah Jenkins', type: 'Room', targetId: 'PALM GARDEN', date: '2026-05-09', time: '11:00', guests: 2, status: 'Checked In', notes: 'Honeymoon' },
-      { id: 'RES-8825', guestName: 'Michael Scott', type: 'Room', targetId: 'OCEAN BREEZE', date: '2026-05-15', time: '14:00', guests: 1, status: 'Confirmed', notes: 'Paper business' }
+      { id: 'RES-8821', guestName: 'Alexander Wright', type: 'Room', targetId: 'ROYAL SUITE', date: getMockDate(0), time: '14:00', guests: 2, status: 'Checked In', notes: 'VIP Treatment requested' },
+      { id: 'RES-8822', guestName: 'Elena Gilbert', type: 'Table', targetId: 'T-03', date: getMockDate(-2), time: '19:30', guests: 4, status: 'Pending', notes: 'Birthday celebration' },
+      { id: 'RES-8823', guestName: 'James Miller', type: 'Room', targetId: 'DELUXE SEAVIEW', date: getMockDate(2), time: '12:00', guests: 1, status: 'Confirmed', notes: 'Business trip' },
+      { id: 'RES-8824', guestName: 'Sarah Jenkins', type: 'Room', targetId: 'PALM GARDEN', date: getMockDate(-1), time: '11:00', guests: 2, status: 'Checked In', notes: 'Honeymoon' },
+      { id: 'RES-8825', guestName: 'Michael Scott', type: 'Room', targetId: 'OCEAN BREEZE', date: getMockDate(5), time: '14:00', guests: 1, status: 'Confirmed', notes: 'Paper business' }
     ];
   });
 
   const [folios, setFolios] = useState(() => {
-    const saved = localStorage.getItem('resto-hospitality-folios');
-    return saved ? JSON.parse(saved) : [];
+    const saved = localStorage.getItem('villa-hospitality-folios');
+    return saved ? JSON.parse(saved) : [
+      {
+        id: 'FOL-0001-1234',
+        guestName: 'Alexander Wright',
+        roomName: 'ROYAL SUITE',
+        status: 'Open',
+        items: [
+          { id: 1, description: 'Room Charge (Suite)', amount: 12500, date: getMockDate(0), type: 'Room' },
+          { id: 2, description: 'In-Villa Dining: Champagne', amount: 4500, date: getMockDate(0), type: 'Misc' },
+          { id: 3, description: 'Spa Therapy', amount: 4500, date: getMockDate(1), type: 'Misc' }
+        ],
+        total: 21500
+      },
+      {
+        id: 'FOL-0002-5678',
+        guestName: 'Sarah Jenkins',
+        roomName: 'PALM GARDEN',
+        status: 'Settled',
+        items: [
+          { id: 1, description: 'Room Charge (Standard)', amount: 3200, date: getMockDate(-1), type: 'Room' },
+          { id: 2, description: 'Sunset Cruise', amount: 2800, date: getMockDate(0), type: 'Misc' }
+        ],
+        total: 6000
+      },
+      {
+        id: 'FOL-0003-9012',
+        guestName: 'Michael Scott',
+        roomName: 'OCEAN BREEZE',
+        status: 'Open',
+        items: [
+          { id: 1, description: 'Room Charge (Deluxe)', amount: 4800, date: getMockDate(5), type: 'Room' },
+          { id: 2, description: 'Airport Shuttle', amount: 1200, date: getMockDate(5), type: 'Misc' }
+        ],
+        total: 6000
+      }
+    ];
   });
 
   const [services, setServices] = useState(() => {
@@ -111,6 +152,15 @@ export const HospitalityProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [promoCodes, setPromoCodes] = useState(() => {
+    const saved = localStorage.getItem('villa-hospitality-promocodes');
+    return saved ? JSON.parse(saved) : [
+      { id: 'PRM-1', code: 'LUMIERE10', percent: 10, status: 'Active' },
+      { id: 'PRM-2', code: 'WELCOME20', percent: 20, status: 'Active' },
+      { id: 'PRM-3', code: 'BALILIFE', percent: 15, status: 'Active' }
+    ];
+  });
+
   const [inventory, setInventory] = useState(() => {
     const saved = localStorage.getItem('resto-hospitality-inventory');
     return saved ? JSON.parse(saved) : [
@@ -120,8 +170,8 @@ export const HospitalityProvider = ({ children }) => {
       { id: 'INV-004', name: 'Cotton Towels (Large)', category: 'Rooms', stock: 120, unit: 'pcs', minStock: 50, price: 450, status: 'In Stock' },
       { id: 'INV-005', name: 'Eco Shampoo 50ml', category: 'Rooms', stock: 15, unit: 'pcs', minStock: 100, price: 35, status: 'Out of Stock' },
       { id: 'INV-006', name: 'LED Light Bulbs (9W)', category: 'Maintenance', stock: 32, unit: 'pcs', minStock: 20, price: 120, status: 'In Stock' },
-      { id: 'INV-007', name: 'Table Linens (White)', category: 'Restaurant', stock: 60, unit: 'pcs', minStock: 20, price: 550, status: 'In Stock' },
-      { id: 'INV-008', name: 'Napkins (Disposable)', category: 'Restaurant', stock: 1200, unit: 'pcs', minStock: 500, price: 2, status: 'In Stock' }
+      { id: 'INV-007', name: 'Table Linens (White)', category: 'In-Villa Dining', stock: 60, unit: 'pcs', minStock: 20, price: 550, status: 'In Stock' },
+      { id: 'INV-008', name: 'Napkins (Disposable)', category: 'In-Villa Dining', stock: 1200, unit: 'pcs', minStock: 500, price: 2, status: 'In Stock' }
     ];
   });
 
@@ -138,7 +188,7 @@ export const HospitalityProvider = ({ children }) => {
   }, [reservations]);
 
   useEffect(() => {
-    localStorage.setItem('resto-hospitality-folios', JSON.stringify(folios));
+    localStorage.setItem('villa-hospitality-folios', JSON.stringify(folios));
   }, [folios]);
 
   useEffect(() => {
@@ -168,6 +218,10 @@ export const HospitalityProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('resto-hospitality-activity', JSON.stringify(activityLog));
   }, [activityLog]);
+
+  useEffect(() => {
+    localStorage.setItem('villa-hospitality-promocodes', JSON.stringify(promoCodes));
+  }, [promoCodes]);
 
   const { addNotification } = useNotifications();
   const { showToast } = useToast();
@@ -434,6 +488,21 @@ export const HospitalityProvider = ({ children }) => {
     addActivity(`New customer added manually: ${customerData.name}`, 'success');
   };
 
+  const addPromoCode = (promoData) => {
+    const newPromo = { ...promoData, id: `PRM-${Date.now()}` };
+    setPromoCodes(prev => [newPromo, ...prev]);
+    addActivity(`New promo code created: ${promoData.code}`, 'success');
+  };
+
+  const updatePromoCode = (id, data) => {
+    setPromoCodes(prev => prev.map(p => p.id === id ? { ...p, ...data } : p));
+  };
+
+  const deletePromoCode = (id) => {
+    setPromoCodes(prev => prev.filter(p => p.id !== id));
+    addActivity(`Promo code deleted`, 'error');
+  };
+
   return (
     <HospitalityContext.Provider value={{
       rooms, addRoom, updateRoom, deleteRoom,
@@ -446,7 +515,8 @@ export const HospitalityProvider = ({ children }) => {
       tasks, addTask, updateTaskStatus, deleteTask,
       inventory, addInventoryItem, updateStock, deleteInventoryItem,
       activityLog, addNotification,
-      customers, addCustomer
+      customers, addCustomer,
+      promoCodes, addPromoCode, updatePromoCode, deletePromoCode
     }}>
       {children}
     </HospitalityContext.Provider>

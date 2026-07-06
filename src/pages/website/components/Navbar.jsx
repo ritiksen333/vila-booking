@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../../../components/common/LanguageSwitcher';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,11 +21,11 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Home', href: '/' },
-    { name: 'Villas', href: '#villas' },
+    { name: t('villas') || 'Villas', href: '#villas' },
     { name: 'Availability', href: '#availability' },
     { name: 'Gallery', href: '#gallery' },
     { name: 'Contact', href: '#contact' },
-    { name: 'Login', href: '/login' },
+    { name: t('login') || 'Login', href: '/login' },
   ];
 
   return (
@@ -60,11 +63,12 @@ const Navbar = () => {
                 </a>
               )
             ))}
+            <LanguageSwitcher className={scrolled ? "text-slate-800" : "text-white"} />
             <a
               href="#booking"
               className="bg-primary text-white px-8 py-3 rounded-none font-semibold hover:bg-primary-dark transition-all duration-300 tracking-widest uppercase text-sm"
             >
-              Book Now
+              {t('book_now') || 'Book Now'}
             </a>
           </div>
 

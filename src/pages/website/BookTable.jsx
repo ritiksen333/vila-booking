@@ -34,13 +34,13 @@ const BookTable = () => {
         </Link>
         
         <nav className="hidden md:flex items-center gap-8">
-          <Link to="/menu" className="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Restaurant</Link>
+          <Link to="/menu" className="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">In-Villa Dining</Link>
           <Link to="/excursions" className="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Excursions</Link>
           <Link to="/transport" className="text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Transport</Link>
         </nav>
 
         <Link to="/book" className="bg-orange-500 text-white px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-orange-200 hover:bg-orange-600 transition-all active:scale-95">
-          Reserve Table
+          Book Service
         </Link>
       </header>
 
@@ -50,9 +50,9 @@ const BookTable = () => {
           <div className="w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center text-orange-500 mb-6">
              <Calendar size={24} />
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-[#1e8a75] uppercase tracking-tighter mb-4">Reserve a Table</h1>
+          <h1 className="text-4xl md:text-5xl font-black text-[#1e8a75] uppercase tracking-tighter mb-4">Book a Service</h1>
           <p className="text-sm md:text-lg text-[#1e8a75]/70 font-bold uppercase tracking-widest">
-            Book your dining experience at LUMIÈRE VILLAS
+            Book your dining or spa service at LUMIÈRE VILLAS
           </p>
         </div>
       </section>
@@ -187,7 +187,7 @@ const BookTable = () => {
 
         <div className="mt-20 text-center">
            <div className="inline-flex items-center gap-2 text-xs font-black text-gray-300 uppercase tracking-widest">
-              Visit us to order <ChevronRight size={14} /> LUMIÈRE VILLAS Restaurant & Bar
+              Visit us to order <ChevronRight size={14} /> LUMIÈRE VILLAS In-Villa Dining & Bar
            </div>
         </div>
       </main>

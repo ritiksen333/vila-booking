@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 
 const GuestDashboard = () => {
   const services = [
-    { icon: Utensils, title: 'Restaurant', desc: 'Breakfast, Lunch & Dinner', color: 'text-orange-500', bg: 'bg-orange-50', link: '/guest-menu' },
+    { icon: Utensils, title: 'In-Villa Dining', desc: 'Private Chef & Room Service', color: 'text-orange-500', bg: 'bg-orange-50', link: '/guest-menu' },
     { icon: Wine, title: 'Bar & Drinks', desc: 'Cocktails & Beverages', color: 'text-purple-500', bg: 'bg-purple-50', link: '/guest-menu' },
     { icon: Compass, title: 'Excursions', desc: 'Adventures & Activities', color: 'text-emerald-500', bg: 'bg-emerald-50', link: '/excursions' },
     { icon: Car, title: 'Transport', desc: 'Transfers & Hire', color: 'text-blue-500', bg: 'bg-blue-50', link: '/transport' },

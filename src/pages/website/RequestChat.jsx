@@ -15,8 +15,8 @@ const RequestChat = () => {
     },
     { 
       icon: UtensilsCrossed, 
-      title: 'Restaurant', 
-      desc: 'Food orders, menu questions', 
+      title: 'In-Villa Dining', 
+      desc: 'Dining orders, service requests', 
       bg: 'bg-orange-50', 
       iconColor: 'text-orange-500', 
       emoji: '🍽️'

@@ -46,13 +46,13 @@ const DigitalMenu = () => {
         </Link>
         
         <nav className="hidden md:flex items-center gap-4 lg:gap-8">
-          <Link to="/menu" className="text-xs lg:text-sm font-bold text-orange-500 border-b-2 border-orange-500 pb-1">Restaurant</Link>
+          <Link to="/menu" className="text-xs lg:text-sm font-bold text-orange-500 border-b-2 border-orange-500 pb-1">In-Villa Dining</Link>
           <Link to="/excursions" className="text-xs lg:text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Excursions</Link>
           <Link to="/transport" className="text-xs lg:text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Transport</Link>
         </nav>
 
         <Link to="/book" className="bg-orange-500 text-white px-4 md:px-6 py-2 md:py-2.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest shadow-lg shadow-orange-200 hover:bg-orange-600 transition-all active:scale-95">
-          Reserve Table
+          Book Service
         </Link>
       </header>
 
@@ -112,7 +112,7 @@ const DigitalMenu = () => {
 
         <div className="mt-16 md:mt-24 text-center">
           <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-4">Visit us to order</p>
-          <p className="text-xs md:text-sm font-black text-gray-400 uppercase tracking-tighter">LUMIÈRE VILLAS Restaurant & Bar</p>
+          <p className="text-xs md:text-sm font-black text-gray-400 uppercase tracking-tighter">LUMIÈRE VILLAS In-Villa Dining & Bar</p>
         </div>
       </main>
 

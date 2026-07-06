@@ -33,15 +33,15 @@ const Settings = () => {
 
   // Centralized Settings State
   const [settings, setSettings] = useState({
-    businessName: 'The Royal Kitchen',
-    email: 'admin@royalkitchen.com',
+    businessName: 'LUMIÈRE VILLAS',
+    email: 'admin@lumierevillas.com',
     phone: '+00 12345 67890',
-    address: '123, Foodie Street, Bangalore, KA 560001',
+    address: '123, Villa Street, Bali, ID 560001',
     currency: 'INR (â‚¹)',
     timezone: '(GMT+05:30) India Standard Time',
     taxRate: '18',
     serviceCharge: '5',
-    invoicePrefix: 'TRK-',
+    invoicePrefix: 'LV-',
     notifyEmail: true,
     notifySMS: false,
     orderAlerts: true,
@@ -144,7 +144,7 @@ const Settings = () => {
 
   const tabs = [
     { id: 'General', icon: SettingsIcon, label: 'General' },
-    { id: 'Restaurant', icon: Store, label: 'Restaurant' },
+    { id: 'Property', icon: Store, label: 'Property' },
     { id: 'Billing', icon: Receipt, label: 'Billing' },
     { id: 'Notifications', icon: Bell, label: 'Notifications' },
     { id: 'Printer', icon: Printer, label: 'Printers' },
@@ -266,7 +266,7 @@ const Settings = () => {
                       <h3 className="text-lg lg:text-xl font-black uppercase tracking-tight mb-6 lg:mb-8 leading-none">Business Identity</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-8">
                          <div className="space-y-2">
-                            <label className="text-[8px] lg:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Restaurant Name</label>
+                            <label className="text-[8px] lg:text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Property Name</label>
                             <input name="businessName" value={settings.businessName} onChange={handleInputChange} className="w-full px-5 lg:px-6 py-3 lg:py-4 bg-slate-50 border-2 border-transparent focus:border-primary focus:bg-white rounded-xl lg:rounded-2xl outline-none text-xs lg:text-sm font-bold" />
                          </div>
                          <div className="space-y-2">
@@ -295,7 +295,7 @@ const Settings = () => {
 
                 </div>
               )}
-              {activeTab === 'Restaurant' && (
+              {activeTab === 'Property' && (
                 <div className="space-y-6 lg:space-y-8">
                    <div className="card p-6 lg:p-10 bg-white rounded-[2rem] lg:rounded-[3rem] shadow-2xl border-none">
                       <div className="flex justify-between items-start mb-6 lg:mb-10">

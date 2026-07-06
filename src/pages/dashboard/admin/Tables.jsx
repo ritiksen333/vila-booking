@@ -138,7 +138,7 @@ const Tables = () => {
         <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
           <div>
             <h2 className="text-xl lg:text-2xl font-black tracking-tight text-text-primary uppercase tracking-[0.05em]">Floor Management</h2>
-            <p className="text-text-secondary mt-1 text-xs lg:text-sm font-medium">Coordinate your restaurant seating in real-time.</p>
+            <p className="text-text-secondary mt-1 text-xs lg:text-sm font-medium">Coordinate your villa assignments and requests in real-time.</p>
           </div>
           <div className="flex flex-wrap gap-2 lg:gap-4">
             {['available', 'occupied', 'reserved'].map(status => {

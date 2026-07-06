@@ -41,7 +41,7 @@ const Transport = () => {
         </Link>
         
         <nav className="hidden md:flex items-center gap-4 lg:gap-8">
-          <Link to="/menu" className="text-xs lg:text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Restaurant</Link>
+          <Link to="/menu" className="text-xs lg:text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">In-Villa Dining</Link>
           <Link to="/excursions" className="text-xs lg:text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors">Excursions</Link>
           <Link to="/transport" className="text-xs lg:text-sm font-bold text-orange-500 border-b-2 border-orange-500 pb-1">Transport</Link>
         </nav>

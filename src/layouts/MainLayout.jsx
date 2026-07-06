@@ -33,12 +33,15 @@ import {
   Compass,
   ClipboardCheck,
   Package,
-  CreditCard
+  CreditCard,
+  ArrowLeft
 } from 'lucide-react';
 import { useAuth, roles } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useCustomer } from '../context/CustomerContext';
 import { cn } from '../utils/cn';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 
 const MainLayout = ({ children }) => {
   const { user, login, logout } = useAuth();
@@ -48,6 +51,7 @@ const MainLayout = ({ children }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const { t } = useTranslation();
 
   const unreadCount = getUnreadCount(user?.role);
   const myNotifications = notifications.filter(n => n.targetRole === user?.role || n.targetRole === 'ALL');
@@ -80,14 +84,16 @@ const MainLayout = ({ children }) => {
   };
 
   const menuItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: getRoleModulePath('dashboard'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Villas', icon: Bed, path: getRoleModulePath('rooms'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Reservations', icon: CalendarCheck, path: getRoleModulePath('reservations'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Calendar', icon: CalendarCheck, path: getRoleModulePath('calendar'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Guests', icon: Users, path: getRoleModulePath('guests'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Billing', icon: Receipt, path: getRoleModulePath('folio'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Reports', icon: BarChart3, path: getRoleModulePath('reports'), roles: [roles.ADMIN, roles.MANAGER] },
-    { name: 'Settings', icon: Settings, path: getRoleModulePath('settings'), roles: [roles.ADMIN] },
+    { name: t('dashboard') || 'Dashboard', icon: LayoutDashboard, path: getRoleModulePath('dashboard'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: t('villas') || 'Villas', icon: Bed, path: getRoleModulePath('rooms'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: t('reservations') || 'Reservations', icon: CalendarCheck, path: getRoleModulePath('reservations'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: t('calendar') || 'Calendar', icon: CalendarCheck, path: getRoleModulePath('calendar'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: t('guests') || 'Guests', icon: Users, path: getRoleModulePath('guests'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: t('billing') || 'Billing', icon: Receipt, path: getRoleModulePath('folio'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: t('reports') || 'Reports', icon: BarChart3, path: getRoleModulePath('reports'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: t('analytics') || 'Analytics', icon: BarChart3, path: getRoleModulePath('analytics'), roles: [roles.ADMIN, roles.MANAGER] },
+    { name: t('promo_codes') || 'Promo Codes', icon: Gift, path: getRoleModulePath('promo-codes'), roles: [roles.ADMIN] },
+    { name: t('settings') || 'Settings', icon: Settings, path: getRoleModulePath('settings'), roles: [roles.ADMIN] },
     
     // Customer Specific Items (Keeping these intact just in case customer portal is used)
     { name: 'Home', icon: Home, path: '/customer/home', roles: [roles.CUSTOMER] },
@@ -168,7 +174,7 @@ const MainLayout = ({ children }) => {
             className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-text-secondary hover:bg-danger/5 hover:text-danger group"
           >
             <LogOut className="w-5 h-5 shrink-0" />
-            {!isCollapsed && <span className="font-bold text-xs">Logout</span>}
+            {!isCollapsed && <span className="font-bold text-xs">{t('logout') || 'Logout'}</span>}
           </button>
         </div>
 
@@ -209,6 +215,16 @@ const MainLayout = ({ children }) => {
             >
               <MenuIcon className="w-6 h-6" />
             </button>
+            
+            <button
+              onClick={() => { logout(); navigate('/login'); }}
+              className="hidden md:flex items-center gap-1.5 p-2 pr-3 bg-slate-50 text-text-secondary hover:text-primary hover:bg-primary/5 rounded-xl transition-all font-bold text-xs"
+              title="Go to Login"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back</span>
+            </button>
+
             <div 
               className="relative w-full max-w-[420px] group z-[100]"
             >
@@ -226,7 +242,7 @@ const MainLayout = ({ children }) => {
                 onFocus={() => setIsSearchFocused(true)}
                 onBlur={() => setIsSearchFocused(false)}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search anything..." 
+                placeholder={t('search') || "Search anything..."}
                 className={cn(
                   "w-full pl-10 pr-4 py-2.5 bg-slate-50 lg:bg-white border-2 rounded-xl lg:rounded-2xl outline-none text-xs font-bold relative z-10 transition-all",
                   isSearchFocused 
@@ -373,6 +389,8 @@ const MainLayout = ({ children }) => {
                 <UserIcon className="w-5 h-5 stroke-[2.5]" />
               </div>
             </div>
+            
+            <LanguageSwitcher className="ml-2 hidden lg:block" />
           </div>
         </header>
 

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 const MyBill = () => {
   const orders = [
-    { id: 'ORD-20260507-E9VH', status: 'Paid — awaiting restaurant', price: 'Rp 120.000', color: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: Clock, items: ['1× Bintang Beer', '1× Tropical Mojito'] },
+    { id: 'ORD-20260507-E9VH', status: 'Paid — awaiting dining service', price: 'Rp 120.000', color: 'bg-emerald-50 text-emerald-600 border-emerald-100', icon: Clock, items: ['1× Bintang Beer', '1× Tropical Mojito'] },
     { id: 'ORD-20260506-NTM9', status: 'Cancelled', price: 'Rp 160.000', color: 'bg-red-50 text-red-500 border-red-100', icon: XCircle, items: ['1× Tropical Mojito', '1× Espresso Martini'] },
     { id: 'ORD-20260506-KXRK', status: 'Cancelled', price: 'Rp 160.000', color: 'bg-red-50 text-red-500 border-red-100', icon: XCircle, items: ['1× Tropical Mojito', '1× Espresso Martini'] },
     { id: 'ORD-20260506-00N1', status: 'Served', price: 'Rp 120.000', color: 'bg-gray-50 text-gray-500 border-gray-100', icon: Bike, items: ['1× Bintang Beer', '1× Tropical Mojito'] },
