@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useStorageSync } from '../hooks/useStorageSync';
 
 const NotificationContext = createContext();
 
@@ -55,6 +56,8 @@ export const NotificationProvider = ({ children }) => {
       }
     ];
   });
+
+  useStorageSync('resto-notifications', setNotifications);
 
   useEffect(() => {
     localStorage.setItem('resto-notifications', JSON.stringify(notifications));

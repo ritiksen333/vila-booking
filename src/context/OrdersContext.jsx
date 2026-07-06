@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useNotifications } from './NotificationContext';
 import { useAuth } from './AuthContext';
+import { useStorageSync } from '../hooks/useStorageSync';
 
 const OrdersContext = createContext();
 
@@ -19,6 +20,8 @@ export const OrdersProvider = ({ children }) => {
       { id: '#1028', type: 'Dine-in', table: 'T-07', status: 'Completed', amount: '₹650', time: '12:15 PM', items: 2, date: 'Today', customer: 'Michael S.', payment: 'UPI', itemsList: [{ name: 'Greek Salad', quantity: 1, price: 650 }], timestamp: new Date(Date.now() - 7200000).toISOString(), priority: 'medium', completedItems: [] },
     ];
   });
+
+  useStorageSync('resto-orders', setOrders);
 
   const lastOrderIdRef = useRef(orders[0]?.id);
 

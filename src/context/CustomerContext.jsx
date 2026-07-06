@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useStorageSync } from '../hooks/useStorageSync';
 
 const CustomerContext = createContext();
 
@@ -68,6 +69,15 @@ export const CustomerProvider = ({ children }) => {
     const saved = localStorage.getItem('resto-customer-support');
     return saved ? JSON.parse(saved) : [];
   });
+
+  useStorageSync('resto-customer-cart', setCartItems);
+  useStorageSync('resto-customer-favorites', setFavorites);
+  useStorageSync('resto-customer-profile', setProfile);
+  useStorageSync('resto-customer-support', setSupportRequests);
+  useStorageSync('resto-customer-payments', setPaymentMethods);
+  useStorageSync('resto-customer-addresses', setAddresses);
+  useStorageSync('resto-customer-notifs', setNotificationPrefs);
+  useStorageSync('resto-customer-settings', setSystemSettings);
 
   useEffect(() => {
     localStorage.setItem('resto-customer-cart', JSON.stringify(cartItems));

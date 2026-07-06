@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useStorageSync } from '../hooks/useStorageSync';
 import { useNotifications } from './NotificationContext';
 
 const CommunicationContext = createContext();
@@ -57,6 +58,9 @@ export const CommunicationProvider = ({ children }) => {
       { guestId: 'CUST-003', guestName: 'Michael Scott', lastMessage: 'I need a wake up call at 6:00 AM.', lastTimestamp: new Date(Date.now() - 1800000).toISOString(), unreadCount: 1 }
     ];
   });
+
+  useStorageSync('resto-communication-messages', setMessages);
+  useStorageSync('resto-communication-chats', setActiveChats);
 
   useEffect(() => {
     localStorage.setItem('resto-communication-messages', JSON.stringify(messages));

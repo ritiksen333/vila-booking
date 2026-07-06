@@ -18,6 +18,17 @@ import { useAuth, roles } from "../../../context/AuthContext";
 const Dashboard = () => {
   const { user } = useAuth();
   const [revenueViewMode, setRevenueViewMode] = useState('Weekly');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    // Simulate a data fetch delay
+    setTimeout(() => {
+      setIsRefreshing(false);
+      // In a real app, you would re-fetch data here.
+      // For now, the real-time sync handles updates.
+    }, 1000);
+  };
 
   const weeklyData = [
     { label: 'Mon', value: 4500 },
@@ -84,7 +95,12 @@ const Dashboard = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-           <button className="p-3 bg-white rounded-xl border border-border text-text-secondary hover:text-primary transition-all shadow-sm"><RefreshCw className="w-5 h-5" /></button>
+           <button 
+             onClick={handleRefresh}
+             className="p-3 bg-white rounded-xl border border-border text-text-secondary hover:text-primary transition-all shadow-sm"
+           >
+             <RefreshCw className={cn("w-5 h-5", isRefreshing && "animate-spin text-primary")} />
+           </button>
         </div>
       </div>
 

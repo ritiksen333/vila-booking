@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { useStorageSync } from '../hooks/useStorageSync';
 
 const AuthContext = createContext();
 
@@ -15,6 +16,8 @@ export const AuthProvider = ({ children }) => {
       role: roles.ADMIN,
     };
   });
+
+  useStorageSync('resto-user', setUser);
 
   const logout = () => {
     localStorage.removeItem('resto-user');

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { useStorageSync } from '../hooks/useStorageSync';
 
 const MenuContext = createContext();
 
@@ -123,6 +124,9 @@ export const MenuProvider = ({ children }) => {
     const saved = localStorage.getItem('pos-menu-categories');
     return saved ? JSON.parse(saved) : initialCategories;
   });
+
+  useStorageSync('pos-menu-items', setItems);
+  useStorageSync('pos-menu-categories', setCategoriesList);
 
   React.useEffect(() => {
     localStorage.setItem('pos-menu-items', JSON.stringify(items));

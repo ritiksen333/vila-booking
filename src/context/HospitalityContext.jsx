@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNotifications } from './NotificationContext';
 import { useToast } from './ToastContext';
+import { useStorageSync } from '../hooks/useStorageSync';
 
 const HospitalityContext = createContext();
 
@@ -174,6 +175,19 @@ export const HospitalityProvider = ({ children }) => {
       { id: 'INV-008', name: 'Napkins (Disposable)', category: 'In-Villa Dining', stock: 1200, unit: 'pcs', minStock: 500, price: 2, status: 'In Stock' }
     ];
   });
+
+  useStorageSync('resto-hospitality-rooms', setRooms);
+  useStorageSync('resto-hospitality-tables', setTables);
+  useStorageSync('resto-hospitality-reservations', setReservations);
+  useStorageSync('villa-hospitality-folios', setFolios);
+  useStorageSync('resto-hospitality-services', setServices);
+  useStorageSync('resto-hospitality-service-bookings', setServiceBookings);
+  useStorageSync('resto-hospitality-activity', setActivityLog);
+  useStorageSync('resto-hospitality-staff', setStaff);
+  useStorageSync('resto-hospitality-tasks', setTasks);
+  useStorageSync('resto-hospitality-customers', setCustomers);
+  useStorageSync('villa-hospitality-promocodes', setPromoCodes);
+  useStorageSync('resto-hospitality-inventory', setInventory);
 
   useEffect(() => {
     localStorage.setItem('resto-hospitality-rooms', JSON.stringify(rooms));
